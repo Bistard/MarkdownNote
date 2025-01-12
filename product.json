@@ -3,6 +3,6 @@
     "applicationName": "nota",
     "description": "A cross-platform markdown note-taking application",
     
-    "version": "0.6.7",
+    "version": "0.6.8",
     "license": "MIT"
 }

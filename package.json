@@ -1,6 +1,6 @@
 {
 	"name": "nota",
-	"version": "0.6.7",
+	"version": "0.6.8",
 	"description": "an open-sourced markdown editor",
 	"main": "./dist/main-bundle.js",
 	"type": "commonjs",
