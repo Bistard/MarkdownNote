@@ -1,0 +1,32 @@
+.hover-box {
+    position: absolute;
+    z-index: 9999;
+    background: var(--hover-background, #2d2d2d);
+    color: var(--hover-foreground, #ffffff);
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+    display: inline-block;
+    min-width: 100px;
+    max-width: 300px;
+    font-size: 13px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: opacity 0.15s ease-in, transform 0.15s ease-in;
+    
+    &.fade-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .hover-content {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    &.my-hover-class {
+        background: #1e1e1e;
+    }
+}
