@@ -19,6 +19,8 @@ import { EditorExtension } from "src/editor/common/editorExtension";
 import { assert, errorToMessage } from "src/base/common/utilities/panic";
 import { AsyncResult, err, ok, Result } from "src/base/common/result";
 import { EditorDragState } from "src/editor/common/cursorDrop";
+import { EditorViewModel } from "src/editor/viewModel/editorViewModel";
+import { IEditorViewModel } from "src/editor/common/viewModel";
 
 /**
  * An interface only for {@link EditorWidget}.
@@ -113,6 +115,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
     
     // MVVM
     private _model: EditorModel | null;
+    private _viewModel: EditorViewModel | null;
     private _view: EditorView | null;
     private _editorData: EditorData | null;
 
@@ -264,6 +267,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
 
         this._container = this.__register(new FastElement(container));
         this._model = null;
+        this._viewModel = null;
         this._view = null;
         this._editorData = null;
 
@@ -310,11 +314,14 @@ export class EditorWidget extends Disposable implements IEditorWidget {
 
         const initData = initState.unwrap();
 
+        // view-model
+        this._viewModel = this.instantiationService.createInstance(EditorViewModel, this._model);
+
         // view
         this._view = this.instantiationService.createInstance(
             EditorView,
             this._container.raw,
-            this._model,
+            this._viewModel,
             initData,
             extensionList,
             this._options.getOptions(),
@@ -324,7 +331,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
         this.__registerMVVMListeners(this._model, this._view);
 
         // cache data
-        this._editorData = this.__register(new EditorData(this._model, this._view, undefined));
+        this._editorData = this.__register(new EditorData(this._model, this._viewModel, this._view, undefined));
         return ok();
     }
 
@@ -458,11 +465,13 @@ class EditorData extends Disposable {
 
     constructor(
         public readonly model: IEditorModel,
+        public readonly viewModel: IEditorViewModel,
         public readonly view: IEditorView,
         public readonly listeners?: IDisposable,
     ) {
         super();
         this.__register(model);
+        this.__register(viewModel);
         this.__register(view);
         if (listeners) {
             this.__register(listeners);
@@ -552,7 +561,6 @@ class EditorExtensionController extends Disposable {
 
         for (const { id, ctor} of extensions) {
             try {
-                logService.trace('EditorWidget', `Editor extension constructing: ${id}`);
                 const instance = this.__register(instantiationService.createInstance(ctor, editorWidget));
                 this._extensions.set(id, instance);
                 logService.trace('EditorWidget', `Editor extension constructed: ${id}`);

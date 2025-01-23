@@ -9,7 +9,7 @@ import { LooseDisposableBucket } from 'src/base/common/dispose';
 import { INavigationViewService, INavView, NavView } from 'src/workbench/parts/navigationPanel/navigationView/navigationView';
 import { IFileOpenEvent, ExplorerViewID, IExplorerViewService } from 'src/workbench/contrib/explorer/explorerService';
 import { IFileTreeService } from 'src/workbench/services/fileTree/treeService';
-import { IInstantiationService } from 'src/platform/instantiation/common/instantiation';
+import { IInstantiationService, IServiceProvider } from 'src/platform/instantiation/common/instantiation';
 import { II18nService } from 'src/platform/i18n/browser/i18nService';
 import { IWorkspaceService } from 'src/workbench/parts/workspace/workspaceService';
 import { TextEditorPaneModel } from 'src/workbench/services/editorPane/editorPaneModel';
@@ -196,6 +196,7 @@ export class ExplorerView extends NavView implements IExplorerViewService {
                      */
                     success = false;
                     container = this.__createEmptyView();
+                    console.log(path);
                     this.logService.error('ExplorerView', `Cannot open the view`, error, { at: URI.toString(path, true) });
                 }
             )
@@ -264,7 +265,17 @@ export class ExplorerView extends NavView implements IExplorerViewService {
 
         // on opening file.
         this._currViewBucket.register(this.fileTreeService.onSelect(e => {
-            this.workspaceService.openEditor(new TextEditorPaneModel(e.item.uri), {});
+            this.workspaceService.openEditor({ uri: e.item.uri }, {});
         }));
     }
+}
+
+export async function openFolderAtExplorerView(provider: IServiceProvider, uri: URI): Promise<void> {
+    const navigationView = provider.getOrCreateService(INavigationViewService);
+    const explorerView = <ExplorerView>navigationView.switchView(ExplorerViewID);
+    
+    if (explorerView.isOpened) {
+        await explorerView.close();
+    }
+    await explorerView.open(uri);
 }

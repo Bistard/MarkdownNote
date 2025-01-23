@@ -928,7 +928,7 @@ export interface IDebouncer<T> extends IDisposable {
  * 
  * @template T The type of the return value of the queued tasks.
  */
-export class Debouncer<T> implements IDebouncer<T> {
+export class Debouncer<T> extends Disposable implements IDebouncer<T> {
 
 	// [field]
 
@@ -940,6 +940,7 @@ export class Debouncer<T> implements IDebouncer<T> {
 	// [constructor]
 
 	constructor(defaultDelay: DelayType) {
+		super();
 		this._defaultDelay = defaultDelay;
 	}
 
@@ -985,7 +986,8 @@ export class Debouncer<T> implements IDebouncer<T> {
 		this._blocker = undefined;
 	}
 
-	public dispose(): void {
+	public override dispose(): void {
+		super.dispose();
 		this.unschedule();
 	}
 
@@ -1047,13 +1049,14 @@ export interface IThrottleDebouncer<T> extends IDisposable {
  * 
  * @template T The type of the return value of the queued tasks.
  */
-export class ThrottleDebouncer<T> implements IThrottleDebouncer<T> {
+export class ThrottleDebouncer<T> extends Disposable implements IThrottleDebouncer<T> {
 	
 	private readonly debouncer: Debouncer<Promise<T>>;
 	private readonly throttler: Throttler;
 
 	constructor(defaultDelay: Time) {
-		this.debouncer = new Debouncer(defaultDelay);
+		super();
+		this.debouncer = this.__register(new Debouncer(defaultDelay));
 		this.throttler = new Throttler();
 	}
 
@@ -1075,10 +1078,6 @@ export class ThrottleDebouncer<T> implements IThrottleDebouncer<T> {
 
 	public unschedule(): void {
 		this.debouncer.unschedule();
-	}
-
-	public dispose(): void {
-		this.debouncer.dispose();
 	}
 }
 

@@ -1,6 +1,6 @@
 import { DataBuffer } from "src/base/common/files/buffer";
 import { ByteSize, FileOperationErrorType } from "src/base/common/files/file";
-import { basename, join, parse } from "src/base/common/files/path";
+import { join, parse } from "src/base/common/files/path";
 import { URI } from "src/base/common/files/uri";
 import { AbstractLogger, Additional, ILogger, ILoggerOpts, LogLevel } from "src/base/common/logger";
 import { AsyncQueue, Blocker } from "src/base/common/utilities/async";
@@ -23,11 +23,10 @@ export class FileLoggerService extends AbstractLoggerService<FileLogger> {
     }
 
     protected override __doCreateLogger(uri: URI, level: LogLevel, opts: ILoggerOpts): FileLogger {
-        const name = opts.name ?? basename(URI.toString(uri));
         const logger = this.instantiationService.createInstance(
             FileLogger,
-            URI.join(uri, name),
-            opts.description ?? opts.name ?? 'No Description',
+            uri,
+            opts.description ?? 'No Description',
             level,
         );
         return logger;
@@ -74,7 +73,7 @@ export class FileLogger extends AbstractLogger implements ILogger {
         this._description = description;
         this._uri = uri;
 
-        this._queue = new AsyncQueue();
+        this._queue = this.__register(new AsyncQueue());
         this._initializing = new Blocker();
 
         this._backupCnt = 1;
@@ -145,6 +144,10 @@ export class FileLogger extends AbstractLogger implements ILogger {
         const blocker = new Blocker<void>();
         this._queue.onDidFlush(() => blocker.resolve());
         return blocker.waiting();
+    }
+
+    public override dispose(): void {
+        super.dispose();
     }
 
     // [private helper methods]

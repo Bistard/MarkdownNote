@@ -1,5 +1,4 @@
 import { tryOrDefault } from "src/base/common/error";
-import { Result } from "src/base/common/result";
 import { Arrays } from "src/base/common/utilities/array";
 import { panic } from "src/base/common/utilities/panic";
 import { Dictionary, Mutable, NonUndefined, Pair, isNumber, isObject, isString } from "src/base/common/utilities/type";

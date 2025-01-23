@@ -64,9 +64,10 @@ export abstract class AbstractLoggerService<TLogger extends ILogger> extends Dis
         const newLogger = this.__doCreateLogger(uri, opts.alwaysLog ? LogLevel.TRACE : this._level, opts);
         const oldLogger = this.getLogger(uri);
         if (oldLogger) {
-            oldLogger.dispose();
+            this.release(oldLogger);
         }
 
+        this.__register(newLogger);
         this._loggers.set(uri, newLogger);
         return newLogger;
     }

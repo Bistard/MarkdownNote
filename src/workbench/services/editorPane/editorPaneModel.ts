@@ -53,7 +53,7 @@ export abstract class EditorPaneModel {
 
 /**
  * @description A shared {@link EditorPaneModel} that can be used for any 
- * editors that should open with plain text file.
+ * editors that can open with plain text file.
  */
 export class TextEditorPaneModel extends EditorPaneModel {
 

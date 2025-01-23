@@ -1,7 +1,7 @@
 {
 	"name": "nota",
-	"version": "0.6.7",
-	"description": "an open-sourced markdown editor",
+	"version": "0.6.8",
+	"description": "A cross-platform markdown note-taking app.",
 	"main": "./dist/main-bundle.js",
 	"type": "commonjs",
 	"private": true,

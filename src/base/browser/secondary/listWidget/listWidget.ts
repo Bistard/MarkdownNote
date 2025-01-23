@@ -7,7 +7,7 @@ import { ListWidgetKeyboardController } from "src/base/browser/secondary/listWid
 import { ListWidgetMouseController } from "src/base/browser/secondary/listWidget/listWidgetMouseController";
 import { ListTrait, ITraitChangeEvent } from "src/base/browser/secondary/listWidget/listWidgetTrait";
 import { IIdentityProvider } from "src/base/browser/secondary/tree/asyncTree";
-import { Disposable, IDisposable } from "src/base/common/dispose";
+import { Disposable } from "src/base/common/dispose";
 import { Event, Register } from "src/base/common/event";
 import { createStandardKeyboardEvent, IStandardKeyboardEvent, KeyCode } from "src/base/common/keyboard";
 import { memoize } from "src/base/common/memoization";

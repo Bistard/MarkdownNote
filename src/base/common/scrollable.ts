@@ -1,4 +1,4 @@
-import { Disposable, IDisposable } from "src/base/common/dispose";
+import { Disposable, IDisposable, untrackDisposable } from "src/base/common/dispose";
 import { Emitter, Register } from "src/base/common/event";
 
 /**
@@ -64,7 +64,7 @@ export interface IScrollable extends IDisposable {
 const MIN_SLIDER_SIZE = 20; // pixels
 
 /**
- * @class A class for storing the numerated data of {@link AbstractScrollbar}.
+ * @class A class for storing the numerated data of scrolling action. 
  * Self-recalculating the correct data of a slider if needed.
  * 
  * A {@link Scrollable} only specifies one type of direction, either vertical or
@@ -340,7 +340,8 @@ export class Scrollable extends Disposable implements IScrollable {
 	}
 
     private __fireOnDidScroll(prev: Scrollable): void {
+        // this `Scrollable` only for the internal usage, safe to untrack.
+        untrackDisposable(prev);
         this._onDidScroll.fire(this.__createScrollEvent(prev));
-        prev.dispose();
     }
 }

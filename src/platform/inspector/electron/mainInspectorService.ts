@@ -7,8 +7,9 @@ import { IMainInspectorService, InspectorData, InspectorDataType } from "src/pla
 import { INSPECTOR_HTML } from "src/platform/window/common/window";
 import { Event } from "src/base/common/event";
 import { assert } from "src/base/common/utilities/panic";
+import { Disposable, LooseDisposableBucket } from "src/base/common/dispose";
 
-export class MainInspectorService implements IMainInspectorService {
+export class MainInspectorService extends Disposable implements IMainInspectorService {
 
     declare _serviceMarker: undefined;
 
@@ -18,6 +19,7 @@ export class MainInspectorService implements IMainInspectorService {
      * Mapping from inspectorWindowID to ownerWindowID
      */
     private readonly _activeInspectors: Map<number, number>;
+    private readonly _activeInspectorsDisposable: Map<number, LooseDisposableBucket>;
 
     // [constructor]
 
@@ -25,7 +27,9 @@ export class MainInspectorService implements IMainInspectorService {
         @ILogService private readonly logService: ILogService,
         @IMainWindowService private readonly mainWindowService: IMainWindowService,
     ) {
+        super();
         this._activeInspectors = new Map();
+        this._activeInspectorsDisposable = new Map();
 
         /**
          * Notify READY to the associated render process that the inspector is
@@ -89,20 +93,32 @@ export class MainInspectorService implements IMainInspectorService {
         });
 
         this._activeInspectors.set(window.id, ownerID);
-        Event.once(window.onDidClose)(() => {
-            this.stop(window.id);
-        });
+        
+        const listeners = this.__register(new LooseDisposableBucket());
+        this._activeInspectorsDisposable.set(window.id, listeners);
+        listeners.register(
+            Event.once(window.onDidClose)(() => {
+                this.stop(window.id);
+            })
+        );
     }
 
     public stop(inspectorID: number): void {
         if (!this._activeInspectors.has(inspectorID)) {
             return;
         }
+
+        // remove related data
         this._activeInspectors.delete(inspectorID);
+        this.release(this._activeInspectorsDisposable.get(inspectorID));
+
+        // make sure the corresponding inspector window still exists.
         const inspectorWindow = this.mainWindowService.getWindowByID(inspectorID);
         if (!inspectorWindow || inspectorWindow.isClosed()) {
             return;
         }
+
+        // the inspector window still exists, we close it.
         this.mainWindowService.closeWindowByID(inspectorID);
     }
 

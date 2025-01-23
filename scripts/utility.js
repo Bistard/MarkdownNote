@@ -158,15 +158,14 @@ class ScriptHelper {
      */
     static setEnv(newEnv) {
         const envPair = [];
-        Object
-        .entries(newEnv)
-        .forEach(([envName, { value, defaultValue }]) => {
-            if (process.env[envName] !== null && process.env[envName] !== undefined) {
-                console.log(Colors.yellow(`    Overwriting the existing environment: ${envName}`));
-            }
-            process.env[envName] = value ?? defaultValue;
-            envPair.push([envName, value ?? defaultValue]);
-        });
+        Object.entries(newEnv)
+            .forEach(([envName, { value, defaultValue }]) => {
+                if (process.env[envName] !== null && process.env[envName] !== undefined) {
+                    log('warn', `[ScriptHelper] Overwriting the existing environment: ${envName}`);
+                }
+                process.env[envName] = value ?? defaultValue;
+                envPair.push([envName, value ?? defaultValue]);
+            });
         return envPair;
     }
     
@@ -216,6 +215,7 @@ class ScriptProcess {
      * @type {boolean}
      */
     #spawned = false;
+    #spawnPromise;
 
     /**
      * @type {Promise<number>}
@@ -273,13 +273,19 @@ class ScriptProcess {
             procReject  = rej;
         });
 
+        let spawnResolve;
+        this.#spawnPromise = new Promise((res, rej) => {
+            spawnResolve = res;
+        });
+
         // listeners
         {
             /**
              * Event fires once the child process has spawned successfully.
              */
-            p.on('spawn', () => {
+            p.once('spawn', () => {
                 this.#spawned = true;
+                spawnResolve();
             });
 
             /**
@@ -342,6 +348,13 @@ class ScriptProcess {
     /** Is the process spawned successfully. */
     get isSpawned() {
         return this.#spawned;
+    }
+
+    /**
+     * @description You may await this method to wait the process has spawned successfully. 
+     */
+    async spawning() {
+        return this.#spawnPromise;
     }
 
     /**

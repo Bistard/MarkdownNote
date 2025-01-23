@@ -120,6 +120,6 @@ export class MainStatusService extends Disposable implements IMainStatusService 
     }
 
     private __registerListeners(): void {
-        this.lifecycleService.onWillQuit((e) => e.join(this.close()));
+        this.__register(this.lifecycleService.onWillQuit((e) => e.join(this.close())));
     }
 }

@@ -274,10 +274,11 @@ export class WorkbenchContextHub extends Disposable {
 
         if (isInputFocused) {
             const tracker = this.__register(new FocusTracker(<HTMLElement>doc.activeElement, false));
-            Event.once(tracker.onDidBlur)(() => {
+            const once = this.__register((tracker.onDidBlur)(() => {
                 this.inputFocused.set(isActiveIsInput(doc));
+                this.release(once);
                 this.release(tracker);
-            });
+            }));
         }
     }
 }

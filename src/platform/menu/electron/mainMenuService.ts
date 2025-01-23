@@ -25,8 +25,8 @@ export class MainMenuService implements IMenuService {
     }
 
     private registerListener() {
-        Event.once(this.mainWindowService.onDidOpenWindow)(window => {
-            Event.once(window.onRendererReady)(() => {
+        Event.onceSafe(this.mainWindowService.onDidOpenWindow)(window => {
+            Event.onceSafe(window.onRendererReady)(() => {
                 window.sendIPCMessage(IpcChannel.Menu);
                 
                 /**

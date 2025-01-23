@@ -181,8 +181,7 @@ export const menuTitleFileRegister = createRegister(
                 group: '2_open',
                 title: 'Open Folder…',
                 command: {
-                    // commandID: AllCommands.OpenFolder,
-                    commandID: "",
+                    commandID: AllCommands.openFolderDialog,
                 },
             },
             {
@@ -280,8 +279,7 @@ export const menuTitleFileRegister = createRegister(
                 group: '6_close',
                 title: 'Close Current Window',
                 command: {
-                    // commandID: AllCommands.CloseWindow,
-                    commandID: "",
+                    commandID: AllCommands.closeApplication,
                 },
             },
         ];

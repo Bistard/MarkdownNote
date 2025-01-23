@@ -36,6 +36,7 @@ export const NotaName = 'nota';
 export const TestDirName = 'tests';
 export const TestPath = URI.toFsPath(URI.fromFile(join(tmpdir(), NotaName, TestDirName))); // make sure the disk schema is lowercase.
 export const TestURI = URI.fromFile(TestPath);
+export const APP_FILE_ROOT_URI = URI.fromFile(globalThis.APP_FILE_ROOT);
 
 export namespace TestIPC {
 

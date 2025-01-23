@@ -1,6 +1,7 @@
 const path = require('path');
 const WebpackBaseConfigurationProvider = require('../webpack/webpack.config.base');
 const nodeExternals = require('webpack-node-externals');
+const { DefinePlugin } = require('webpack');
 
 /**
  * @description The webpack configuration of the application compilation only
@@ -28,6 +29,11 @@ class WebpackUnitTestConfigurationProvider extends WebpackBaseConfigurationProvi
                 // only run in development mode
                 mode: 'development',
                 cwd: this.#cwd,
+                plugins: [
+                    new DefinePlugin({
+                        'globalThis.APP_FILE_ROOT': JSON.stringify(this.#cwd),
+                    }),
+                ]
             }), 
             {
                 // make sure running in nodejs environment

@@ -3,6 +3,10 @@ const { localizationGenerator } = require("./i18n");
 const { SUPPORT_LOCALIZATION_LIST } = require('./localization');
 const { log } = require('../utility');
 
+/**
+ * This is a executable script for the command `npm run script validate-i18n`.
+ */
+
 const cwd = process.cwd();
 const sourceCodePath = path.resolve(cwd, './src');
 const localeOutputPath = path.resolve(cwd, './assets/locale');

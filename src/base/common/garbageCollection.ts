@@ -50,18 +50,25 @@ export interface IFinalizationRegistryOptions<T> {
  * registry.register(obj, "someValue");
  */
 export function createFinalizationRegistry<T>(opts: IFinalizationRegistryOptions<T>): FinalizationRegistry<T> {
-    const results: T[] = [];
-
-    setInterval(() => {
-		if (results.length === 0) {
-			return;
-		}
-        opts.onGarbageCollectedInterval?.(results);
-        results.length = 0;
-	}, opts.internalTime?.toMs().time ?? 5000);
+    let cached: T[] | undefined = undefined;
+    
+    if (opts.onGarbageCollectedInterval) {
+        cached = [];
+        
+        setInterval(() => {
+            if (!cached || cached.length === 0) {
+                return;
+            }
+            opts.onGarbageCollectedInterval?.(cached);
+            cached.length = 0;
+        }, opts.internalTime?.toMs().time ?? 5000);
+    }
 
     return new FinalizationRegistry((held: T) => {
         opts.onGarbageCollectedImmediate?.(held);
-        results.push(held);
+        
+        if (cached) {
+            cached.push(held);
+        }
     });
 }

@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 import { isParentOf } from 'src/base/common/files/glob';
 import { IS_WINDOWS } from 'src/base/common/platform';
-import { hit } from 'test/utils/helpers';
 
 suite('glob-test', () => {
 

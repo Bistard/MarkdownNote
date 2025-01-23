@@ -1,6 +1,6 @@
 import { Disposable, IDisposable } from "src/base/common/dispose";
 import { AsyncResult, Result, err, ok } from "src/base/common/result";
-import { Emitter, Register } from "src/base/common/event";
+import { Emitter, Event, Register } from "src/base/common/event";
 import { DataBuffer } from "src/base/common/files/buffer";
 import { FileSystemProviderAbleToRead, hasOpenReadWriteCloseCapability, hasReadWriteCapability, IReadFileOptions, IFileSystemProvider, IFileSystemProviderWithFileReadWrite, IFileSystemProviderWithOpenReadWriteClose, IWriteFileOptions, IFileStat, FileType, FileOperationErrorType, FileSystemProviderCapability, IDeleteFileOptions, IResolveStatOptions, IResolvedFileStat, hasReadFileStreamCapability, IFileSystemProviderWithReadFileStream, ICreateFileOptions, FileOperationError, hasCopyCapability, IWatchOptions, FileSystemProviderError } from "src/base/common/files/file";
 import { basename, dirname } from "src/base/common/files/path";
@@ -170,11 +170,13 @@ export class FileService extends Disposable implements IFileService {
 
     public registerProvider(scheme: string | Schemas, provider: IFileSystemProvider): void {
         this._providers.set(scheme, provider);
-
+        
+        this.__register(provider);
         this.__register(provider.onDidResourceChange(e => this._onDidResourceChange.fire(e)));
         this.__register(provider.onDidResourceClose(uri => {
             this.logService.debug('FileService', `stop watching at: ${URI.toString(uri)}`);
 
+            this.release(this._activeWatchers.get(uri));
             this._activeWatchers.delete(uri);
             this._onDidResourceClose.fire(uri);
 
@@ -332,37 +334,32 @@ export class FileService extends Disposable implements IFileService {
         }
 
         this.logService.debug('FileService', `Start watching on file (${URI.toString(uri)})...`);
-
-        const get = this.__getProvider(uri);
-        if (get.isErr()) {
-            return AsyncResult.err(get.error);
-        }
-        const provider = get.unwrap();
-
-        const result = Result.fromThrowable(
-            () => provider.watch(uri, opts),
-            error => new FileOperationError(errorToMessage(error), getFileErrorCode(error)),
-        );
-        
-        if (result.isErr()) {
-            return AsyncResult.err(result.error);
-        }
-
-        return Result.fromPromise(
-            () => result.unwrap(),
-            error => new FileOperationError(`Cannot watch at target: '${URI.toString(uri)}'. Reason: ${errorToMessage(error)}`, FileOperationErrorType.UNKNOWN))
-        .andThen(disposable => {
-            this._activeWatchers.set(uri, disposable);
-            return ok(disposable);
-        });
+        return this.__getProvider(uri).toAsync()
+            .andThen(provider => {
+                return provider.watch(uri, opts);
+            })
+            .andThen(async disposable => {
+                this._activeWatchers.set(uri, this.__register(disposable));
+                return disposable;
+            })
+            .mapErr(error => 
+                new FileOperationError(`Cannot watch at target: '${URI.toString(uri)}'. Reason: ${errorToMessage(error)}`, FileOperationErrorType.UNKNOWN)
+            );
     }
 
     public override dispose(): void {
-        for (const active of this._activeWatchers.values()) {
-            active.dispose();
+        if (this._activeWatchers.size > 0) {
+            // have to unregister listeners after everything is done
+            Event.onceSafe(this.onDidAllResourceClosed)(() => {
+                super.dispose();
+            });
+        } else {
+            super.dispose();
         }
-        // have to unregister listeners after everything is done
-        this.onDidAllResourceClosed(() => super.dispose());
+        
+        for (const active of this._activeWatchers.values()) {
+            this.release(active);
+        }
     }
 
     /***************************************************************************

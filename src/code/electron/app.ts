@@ -99,7 +99,7 @@ export class ApplicationInstance extends Disposable implements IApplicationInsta
     // [private methods]
 
     private registerListeners(): void {
-        Event.once(this.lifecycleService.onWillQuit)(() => this.dispose());
+        Event.onceSafe(this.lifecycleService.onWillQuit)(() => this.dispose());
 
         // interrupt unexpected errors so that the error will not go back to `main.ts`
         process.on('uncaughtException', err => ErrorHandler.onUnexpectedError(err));

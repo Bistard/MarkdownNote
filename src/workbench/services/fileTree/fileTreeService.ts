@@ -531,7 +531,7 @@ export class FileTreeService extends Disposable implements IFileTreeService, IFi
                 horizontalPosition: AnchorHorizontalPosition.Right,
                 verticalPosition: AnchorVerticalPosition.Below,
                 getAnchor: () => anchor,
-                getContext: () => e
+                getContext: () => e.data?.uri
             }, this.workbenchService.element.raw);
         }));
     }

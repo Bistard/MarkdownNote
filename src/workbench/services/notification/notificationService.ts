@@ -134,7 +134,7 @@ export class NotificationService extends Disposable implements INotificationServ
         const element = instance.render();
         this._container.appendChild(element);
 
-        Event.once(instance.onClose)(() => {
+        Event.onceSafe(instance.onClose)(() => {
             Arrays.remove(this._notifications, instance);
         });
     }

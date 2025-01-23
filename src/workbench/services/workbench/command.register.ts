@@ -16,13 +16,24 @@ import { IFileTreeService } from "src/workbench/services/fileTree/treeService";
 import { IS_WINDOWS } from "src/base/common/platform";
 import { IBrowserInspectorService } from "src/platform/inspector/common/inspector";
 import { INavigationViewService } from "src/workbench/parts/navigationPanel/navigationView/navigationView";
-import { ExplorerView } from "src/workbench/contrib/explorer/explorer";
+import { ExplorerView, openFolderAtExplorerView } from "src/workbench/contrib/explorer/explorer";
 import { IRecentOpenService } from "src/platform/app/browser/recentOpenService";
+import { IDialogService } from "src/platform/dialog/browser/browserDialogService";
 
 export const rendererWorkbenchCommandRegister = createRegister(
     RegistrantType.Command, 
     'rendererWorkbench',
     (registrant) => {
+        // debugger: allow to execute command with empty string.
+        registrant.registerCommandBasic(
+            {
+                id: '',
+                command: (provider) => {
+                    provider.getOrCreateService(ILogService).warn('CommandService', 'Executing command with empty id (``), make sure this is expected.');
+                },
+            },
+        );
+
         registrant.registerCommandBasic(
             {
                 id: AllCommands.toggleDevTool,
@@ -137,12 +148,8 @@ export const rendererWorkbenchCommandRegister = createRegister(
         );
         registrant.registerCommandBasic({
             id: AllCommands.fileTreeOpenFolder,
-            command: (provider, target: URI) => {
-                const navViewService = provider.getOrCreateService(INavigationViewService);
-                const currentView = navViewService.currView();
-                if (currentView && ExplorerView.is(currentView)) {
-                    currentView.open(target);
-                }
+            command: async (provider, target: URI) => {
+                return openFolderAtExplorerView(provider, target);
             }
         });
         registrant.registerCommandBasic(
@@ -155,6 +162,28 @@ export const rendererWorkbenchCommandRegister = createRegister(
             }
         );
     },
+);
+
+export const rendererTitleBarFileCommandRegister = createRegister(
+    RegistrantType.Command, 
+    'rendererTitleBar',
+    (registrant) => {
+        registrant.registerCommandBasic({
+            id: AllCommands.openFolderDialog, 
+            command: async (provider) => {
+                const dialogService = provider.getOrCreateService(IDialogService);
+                const paths = await dialogService.openDirectoryDialog({ 
+                    title: 'Open a Folder', // todo: i18n
+                });
+
+                if (paths.length === 0) {
+                    return;
+                }
+                const uri = URI.fromFile(paths.at(-1)!);
+                await openFolderAtExplorerView(provider, uri);
+            }
+        });
+    }
 );
 
 class AlertError extends Command {

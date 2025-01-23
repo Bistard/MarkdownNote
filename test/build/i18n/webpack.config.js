@@ -3,6 +3,7 @@ const path = require('path');
 const WebpackBaseConfigurationProvider = require('../../../scripts/webpack/webpack.config.base');
 const { KeyToIndexTransformPlugin } = require('../../../scripts/i18n/i18n.plugin');
 const { ScriptHelper } = require("../../../scripts/utility");
+const { DefinePlugin } = require('webpack');
 
 
 class WebpackConfigurationProvider extends WebpackBaseConfigurationProvider {
@@ -32,7 +33,10 @@ class WebpackConfigurationProvider extends WebpackBaseConfigurationProvider {
                         localizationFileName: 'en.json',
                         lookupFileName: 'en_lookup_table.json',
                         otherLocales: [],
-                    })
+                    }),
+                    new DefinePlugin({
+                        'globalThis.APP_FILE_ROOT': JSON.stringify(this.#cwd),
+                    }),
                 ],
             })
         );

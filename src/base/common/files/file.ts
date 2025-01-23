@@ -69,7 +69,7 @@ export interface IResolvedFileStat extends IFileStat {
 }
 
 /** @description the base interface for any other FileSystemProvider. */
-export interface IFileSystemProvider {
+export interface IFileSystemProvider extends IDisposable {
 
 	readonly capabilities: FileSystemProviderCapability;
 	readonly onDidResourceChange: Register<IRawResourceChangeEvents>;

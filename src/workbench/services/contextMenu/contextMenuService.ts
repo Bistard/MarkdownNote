@@ -10,10 +10,8 @@ import { INotificationService } from "src/workbench/services/notification/notifi
 import { isDefined } from "src/base/common/utilities/type";
 import { MenuTypes } from "src/platform/menu/common/menu";
 import { RegistrantType } from "src/platform/registrant/common/registrant";
-import { FileItem } from "src/workbench/services/fileTree/fileItem";
 import { ICommandService } from "src/platform/command/common/commandService";
 import { IRegistrantService } from "src/platform/registrant/common/registrantService";
-import { ITreeContextmenuEvent } from "src/base/browser/secondary/tree/tree";
 import { IContextService } from "src/platform/context/common/contextService";
 
 export const IContextMenuService = createService<IContextMenuService>('context-menu-service');
@@ -181,6 +179,8 @@ export class ContextMenuService extends Disposable implements IContextMenuServic
         const menuItems = registrant.getMenuitems(menuType);
 
         const actions: IMenuAction[] = menuItems.map((item) => {
+            const providedArgs = (item.command.args ?? []);
+            
             // check box
             if (item.command.checked !== undefined) {
                 return new CheckMenuAction({
@@ -191,7 +191,7 @@ export class ContextMenuService extends Disposable implements IContextMenuServic
                     mac: item.command.mac,
                     extraClassName: 'toggle-item',
                     onChecked: (checked) => {
-                        this.commandService.executeCommand(item.command.commandID, { checked });
+                        this.commandService.executeCommand(item.command.commandID, ...providedArgs, { checked });
                     },
                 });
             }
@@ -212,8 +212,8 @@ export class ContextMenuService extends Disposable implements IContextMenuServic
                 id: item.title,
                 key: item.command.keybinding,
                 mac: item.command.mac,
-                callback: (ctx: ITreeContextmenuEvent<FileItem>) => {
-                    this.commandService.executeCommand(item.command.commandID, ctx.data?.uri);
+                callback: (ctx: unknown) => {
+                    this.commandService.executeCommand(item.command.commandID, ...providedArgs, ctx);
                 },
             });
         });
@@ -312,7 +312,7 @@ class __ContextMenuDelegate implements IContextMenuDelegate {
         [
             menu.onDidBlur,
             menu.onDidClose,
-            new DomEmitter(window, EventType.blur).registerListener,
+            menuDisposables.register(new DomEmitter(window, EventType.blur)).registerListener,
         ]
         .forEach(onEvent => {
             menuDisposables.register(

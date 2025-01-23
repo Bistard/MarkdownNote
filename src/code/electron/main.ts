@@ -108,13 +108,10 @@ const main = new class extends class MainProcess extends Disposable implements I
 
             // application run
             {
-                Event.once(this.lifecycleService.onWillQuit)(e => {
+                Event.onceSafe(this.lifecycleService.onWillQuit)(e => {
                     // release all the watching resources
                     e.join(new EventBlocker(this.fileService.onDidAllResourceClosed).waiting());
                     this.fileService.dispose();
-
-                    // flush all the logging messages before we quit
-                    e.join(this.logService.flush().then(() => this.logService.dispose()));
                 });
 
                 await this.resolveSingleApplication(true);
@@ -177,7 +174,12 @@ const main = new class extends class MainProcess extends Disposable implements I
             // console-logger
             new ConsoleLogger(environmentService.mode === ApplicationMode.DEVELOP ? environmentService.logLevel : LogLevel.WARN),
             // file-logger
-            fileLoggerService.createLogger(environmentService.logPath, { description: 'main', name: `main-${getFormatCurrTimeStamp()}.txt` }),
+            fileLoggerService.createLogger(
+                URI.join(environmentService.logPath, `main-${getFormatCurrTimeStamp()}.txt`), 
+                { 
+                    description: 'main'
+                }
+            ),
         ]);
         logService.setLogger(pipelineLogger);
 
@@ -274,7 +276,7 @@ const main = new class extends class MainProcess extends Disposable implements I
                     resolve(tcpServer);
                 });
             });
-            Event.once(this.lifecycleService.onWillQuit)(async p => {
+            Event.onceSafe(this.lifecycleService.onWillQuit)(async p => {
                 const blocker = new Blocker<void>();
                 server.close(() => blocker.resolve());
                 p.join(blocker.waiting());

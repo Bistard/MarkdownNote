@@ -48,8 +48,10 @@ export interface INavigationViewService extends IComponent, IService {
     /**
      * @description Switch to the view by the provided id.
      * @param id The id of the view.
+     * @returns The reference to the current switched view.
      */
-    switchView(id: string): void;
+    switchView(id: undefined): void;
+    switchView<TView extends NavView>(id: string): TView;
 
     /**
      * @description Closes the current view.
@@ -145,9 +147,11 @@ export class NavigationView extends Component implements INavigationViewService 
         return true;
     }
 
-    public switchView(id: string): void {
-        const view = this.__getOrConstructView(id);
-        this.__switchView(view);
+    public switchView(id: undefined): void;
+    public switchView<TView extends NavView>(id: string): TView;
+    public switchView<TView extends NavView>(id?: string): TView | void {
+        const view = this.__getOrConstructView(id ?? '');
+        return <TView>this.__switchView(view);
     }
 
     public closeView(): void {
@@ -199,7 +203,7 @@ export class NavigationView extends Component implements INavigationViewService 
         return <T>newView;
     }
 
-    private __switchView(view: NavView | undefined): void {
+    private __switchView(view: NavView | undefined): NavView | void {
         if (!this._viewContainer) {
             return;
         }
@@ -212,7 +216,7 @@ export class NavigationView extends Component implements INavigationViewService 
 
         // switch to the same view, do nothing.
         if (this._currView?.id === view.id) {
-            return;
+            return this._currView;
         }
 
         // if any view is displaying, unload it first.
@@ -230,6 +234,8 @@ export class NavigationView extends Component implements INavigationViewService 
 
         this._currView = this.__register(view);
         this._onDidViewChange.fire({ id: view.id, view: view });
+
+        return view;
     }
 
     private __unloadView(id: string): void {

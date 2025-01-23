@@ -6,6 +6,7 @@ import { AsyncQueue } from "src/base/common/utilities/async";
 import { nullToUndefined } from "src/base/common/utilities/type";
 import { IDialogService, IInternalOpenDialogOptions, IOpenDialogOptions } from "src/platform/dialog/common/dialog";
 import { createService } from "src/platform/instantiation/common/decorator";
+import { Disposable } from "src/base/common/dispose";
 
 export const IMainDialogService = createService<IMainDialogService>('main-dialog-service');
 
@@ -21,7 +22,7 @@ type ElectronDialogReturnType = Electron.MessageBoxReturnValue | Electron.SaveDi
  * the three vanilla APIs from electron, dialog-service also provides three 
  * extra APIs for opening different type of 'open-dialog's.
  */
-export class MainDialogService implements IMainDialogService {
+export class MainDialogService extends Disposable implements IMainDialogService {
 
     declare _serviceMarker: undefined;
 
@@ -39,7 +40,9 @@ export class MainDialogService implements IMainDialogService {
 
     constructor(
         @ILogService private readonly logService: ILogService,
-    ) { }
+    ) {
+        super();
+    }
 
     // [public methods]
 
@@ -140,14 +143,14 @@ export class MainDialogService implements IMainDialogService {
         if (!window) {
             queue = this._dialogQueues.get(-1);
             if (!queue) {
-                queue = new AsyncQueue();
+                queue = this.__register(new AsyncQueue());
                 this._dialogQueues.set(-1, queue);
             }
         }
         else {
             queue = this._dialogQueues.get(window.id);
             if (!queue) {
-                queue = new AsyncQueue();
+                queue = this.__register(new AsyncQueue());
                 this._dialogQueues.set(window.id, queue);
             }
         }

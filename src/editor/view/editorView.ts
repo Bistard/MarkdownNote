@@ -7,10 +7,11 @@ import { RichtextEditor } from 'src/editor/view/richtextEditor';
 import { IEditorExtension } from 'src/editor/common/editorExtension';
 import { IEditorModel } from 'src/editor/common/model';
 import { ProseEditorState } from 'src/editor/common/proseMirror';
+import { IEditorViewModel } from 'src/editor/common/viewModel';
 
 export class ViewContext {
     constructor(
-        public readonly model: IEditorModel,
+        public readonly viewModel: IEditorViewModel,
         public readonly view: IEditorView,
         public readonly options: EditorOptionsType,
         public readonly log: (event: ILogEvent) => void,
@@ -77,7 +78,7 @@ export class EditorView extends Disposable implements IEditorView {
     
     constructor(
         container: HTMLElement,
-        model: IEditorModel,
+        viewModel: IEditorViewModel,
         initState: ProseEditorState,
         extensions: IEditorExtension[],
         options: EditorOptionsType,
@@ -88,7 +89,7 @@ export class EditorView extends Disposable implements IEditorView {
         this._container = document.createElement('div');
         this._container.className = 'editor-view-container';
 
-        const context = new ViewContext(model, this, options, event => defaultLog(logService, event.level, 'EditorView', event.message, event.error, event.additional));
+        const context = new ViewContext(viewModel, this, options, event => defaultLog(logService, event.level, 'EditorView', event.message, event.error, event.additional));
         this._ctx = context;
 
         // the centre that integrates the editor-related functionalities
@@ -143,20 +144,19 @@ export class EditorView extends Disposable implements IEditorView {
     // [private helper methods]
 
     private __registerEventFromModel(): void {
-        const model = this._ctx.model;
+        const viewModel = this._ctx.viewModel;
 
-        this.__register(model.onDidBuild(newState => {
+        this.__register(viewModel.onDidBuild(newState => {
             this._view.render(newState);
         }));
 
-        this.__register(model.onTransaction(tr => {
-            console.log('[view] dispatching');
+        this.__register(viewModel.onDidChangeModelState(tr => {
             this._view.internalView.dispatch(tr);
         }));
     }
 
     private __registerEventToModel(): void {
-        const model = this._ctx.model;
+        const viewModel = this._ctx.viewModel;
 
         /**
          * Since in Prosemirror whenever the content of the document changes, 
@@ -164,8 +164,7 @@ export class EditorView extends Disposable implements IEditorView {
          * need to inform {@link IEditorModel} to update its state.
          */
         this.__register(this._view.onDidContentChange(e => {
-            const newState = e.view.state;
-            model.__onDidStateChange(newState);
+            viewModel.onDidChangeViewState(e);
         }));
     }
 }

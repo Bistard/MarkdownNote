@@ -82,7 +82,10 @@ suite('LoggerService', () => {
         });
 
         test('basics', async () => {
-            const logger = loggerService.createLogger(URI.fromFile('base'), { name: 'test.log', description: 'test.log' });
+            const logger = loggerService.createLogger(
+                URI.join(URI.fromFile('base'), 'test.log'), 
+                { description: 'test.log' }
+            );
             await logger.waitInitialize();
             assert.ok(await fileService.exist(URI.fromFile('base/test.log')).unwrap());
 
@@ -134,11 +137,14 @@ suite('LoggerService', () => {
 
         test('basics', async () => {
 
-            // consturct logger from client side
-            const browserLogger = browserLoggerService.createLogger(URI.fromFile('base'), { name: 'test.log', description: 'test.log' });
+            // construct logger from client side
+            const browserLogger = browserLoggerService.createLogger(
+                URI.join(URI.fromFile('base'), 'test.log'), 
+                { description: 'test.log' }
+            );
             await delayFor(INSTANT_TIME);
             assert.ok((await fileService.exist(URI.fromFile('base/test.log')).unwrap()));
-            const mainLogger = loggerService.getLogger(URI.fromFile('base'));
+            const mainLogger = loggerService.getLogger(URI.fromFile('base/test.log'));
             assert.ok(mainLogger);
 
             // log from client side

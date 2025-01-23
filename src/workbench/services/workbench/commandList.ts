@@ -32,6 +32,10 @@ import { FileItem } from "src/workbench/services/fileTree/fileItem";
  */
 export const enum AllCommands {
     
+    // [TitleBar - File]
+
+    openFolderDialog = 'openFolderDialog',
+
     // [workbench]
 
     alertError       = 'alertError',
@@ -70,6 +74,8 @@ export const enum AllCommands {
  * that requires a human-readable explanation.
  */
 export const AllCommandsDescriptions: { [key in AllCommands]: string } = {
+
+    [AllCommands.openFolderDialog]: 'Select a folder in a dialog and open in the file tree.',
 
     [AllCommands.alertError]:       'Displays error messages in a popup notification.',
     [AllCommands.toggleDevTool]:    'Toggle the developer tool of the whole application.',
@@ -114,6 +120,8 @@ export const AllCommandsDescriptions: { [key in AllCommands]: string } = {
  */
 export type AllCommandsArgumentsTypes = {
     
+    [AllCommands.openFolderDialog]: [];
+
     [AllCommands.alertError]      : [reporter: string, error: any];
     [AllCommands.toggleDevTool]   : [];
     [AllCommands.toggleInspector] : [];
@@ -155,6 +163,8 @@ export type AllCommandsArgumentsTypes = {
  * ```
  */
 export type AllCommandsReturnTypes = {
+
+    [AllCommands.openFolderDialog]: void;
 
     [AllCommands.alertError]      : void;
     [AllCommands.toggleDevTool]   : void;

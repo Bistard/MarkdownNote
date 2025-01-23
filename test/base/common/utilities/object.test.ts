@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { deepCopy, deepFreeze, mixin, strictEquals } from 'src/base/common/utilities/object';
-import { nullObject, shouldThrow } from 'test/utils/helpers';
+import { nullObject } from 'test/utils/helpers';
 
 suite('object-test', () => {
 
@@ -148,12 +148,11 @@ suite('object-test', () => {
         };
         
         deepFreeze(obj);
-
-        shouldThrow(() => obj.prop1 = 4 );
-        shouldThrow(() => obj.prop2 = false );
-        shouldThrow(() => obj.prop3 = 'world' );
-        shouldThrow(() => obj.prop4[0] = 'hello' );
-        shouldThrow(() => obj.prop4[1] = 2.7 );
+        assert.throws(() => obj.prop1 = 4 );
+        assert.throws(() => obj.prop2 = false );
+        assert.throws(() => obj.prop3 = 'world' );
+        assert.throws(() => obj.prop4[0] = 'hello' );
+        assert.throws(() => obj.prop4[1] = 2.7 );
     });
 
     test('nullObject', () => {

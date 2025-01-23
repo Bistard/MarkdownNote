@@ -1,4 +1,4 @@
-import { addDisposableListener, DomEmitter, EventType } from "src/base/browser/basic/dom";
+import { DomEmitter, EventType } from "src/base/browser/basic/dom";
 import { Disposable, IDisposable } from "src/base/common/dispose";
 import { Emitter, Event, Register } from "src/base/common/event";
 import { createStandardKeyboardEvent, IStandardKeyboardEvent } from "src/base/common/keyboard";
@@ -272,7 +272,7 @@ export interface IProseEventBroadcaster extends IDisposable {
  *  - binding with a {@link ProseEditorProperty}, all the events from prosemirror
  *    will be emitted through our own {@link Emitter}.
  *  - binding with a {@link ProseEditorView}, all the events with an additional
- *    event {@link ProseDirectEditorProperty.dispatchTransaction} will be emitted.
+ *    event {@link ProseDirectEditorProperty['dispatchTransaction']} will be emitted.
  */
 export class ProseEventBroadcaster extends Disposable implements IProseEventBroadcaster {
 

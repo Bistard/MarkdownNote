@@ -126,7 +126,9 @@ export class MainLifecycleService extends AbstractLifecycleService<LifecyclePhas
             })()
         ]);
 
+        // flush all the logging messages before we actually quit
         await this.logService.flush();
+        this.logService.dispose();
 
         // quit immediately without asking the user.
         app.exit(exitcode);

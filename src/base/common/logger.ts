@@ -171,11 +171,6 @@ export interface ILogService extends ILogger, IService { }
 export interface ILoggerOpts {
 
     /**
-     * The name of the logger.
-     */
-    readonly name?: string;
-
-    /**
      * The description of the logger.
      */
     readonly description?: string;

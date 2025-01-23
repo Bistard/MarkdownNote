@@ -2,6 +2,7 @@ import { memoize } from "src/base/common/memoization";
 import { CharCode } from "src/base/common/utilities/char";
 import { Numbers } from "src/base/common/utilities/number";
 import { panic } from "src/base/common/utilities/panic";
+import { Random } from "src/base/common/utilities/random";
 import { Dictionary, DightInString } from "src/base/common/utilities/type";
 
 /**
@@ -241,6 +242,13 @@ export class Color implements IColor {
 
 	public static is(obj: any): obj is Color {
 		return obj instanceof Color;
+	}
+
+	/**
+	 * @description Generate a random color.
+	 */
+	public static random(): Color {
+		return new Color(new RGBA(Random.int(256), Random.int(256), Random.int(256)));
 	}
 
 	@memoize

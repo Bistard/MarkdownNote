@@ -1,10 +1,8 @@
 import type { IO } from "src/base/common/utilities/functional";
 import { LinkedList } from "src/base/common/structures/linkedList";
-import { Disposable, DisposableBucket, IDisposable, LooseDisposableBucket, toDisposable } from "src/base/common/dispose";
+import { Disposable, DisposableBucket, IDisposable, LooseDisposableBucket, toDisposable, untrackDisposable } from "src/base/common/dispose";
 import { ErrorHandler } from "src/base/common/error";
 import { panic } from "src/base/common/utilities/panic";
-import { createFinalizationRegistry } from "src/base/common/garbageCollection";
-import { Time } from "src/base/common/date";
 
 /*******************************************************************************
  * This file contains a series event emitters and related tools for communications 
@@ -356,7 +354,6 @@ export class DelayableEmitter<T> extends Emitter<T> {
  */
 export class SignalEmitter<T, E> extends Emitter<E> { 
 
-    private disposables = new DisposableBucket();
     private logicHandler: (event: T) => E;
 
     constructor(events: Register<T>[], logicHandler: (event: T) => E) {
@@ -369,16 +366,11 @@ export class SignalEmitter<T, E> extends Emitter<E> {
     }
 
     public add(register: Register<T>, logicHandler: (event: T) => E = this.logicHandler): IDisposable {
-        return this.disposables.register(
+        return this.__register(
             register((event: T) => {
                 this.fire(logicHandler(event));
             })
         );
-    }
-
-    public override dispose(): void {
-        super.dispose();
-        this.disposables.dispose();
     }
 }
 
@@ -498,8 +490,8 @@ export class NodeEventEmitter<T> extends Disposable {
 		const onLastRemove = () => nodeEmitter.removeListener(channel, onData);
         this._emitter = this.__register(new Emitter({ 
             onFirstListenerAdd: onFirstAdd, 
-            onLastListenerDidRemove: onLastRemove }
-        ));
+            onLastListenerDidRemove: onLastRemove 
+        }));
     }
 
     get registerListener(): Register<T> {
@@ -612,6 +604,19 @@ export namespace Event {
             }
 
             return oldListener;
+        };
+    }
+
+    /**
+     * @description A SAFE version of {@link Event.once()}, where the returned
+     * unregistration {@link IDisposable} is safe to be GCed withour properly 
+     * disposed.
+     */
+    export function onceSafe<T>(register: Register<T>): Register<T> {
+        return (listener: Listener<T>, disposables?: IDisposable[], thisObject: any = null) => {
+            return untrackDisposable(
+                Event.once(register)(listener, disposables, thisObject)
+            );
         };
     }
 

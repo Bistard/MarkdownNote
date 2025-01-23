@@ -49,7 +49,7 @@ export class Watcher extends Disposable implements IWatcher {
             return Promise.resolve(Disposable.NONE);
         }
 
-        const instance = new WatchInstance(this.logService, request, e => this._onDidChange.fire(e));
+        const instance = this.__register(new WatchInstance(this.logService, request, e => this._onDidChange.fire(e)));
         instance.watch();
 
         this._instances.set(request.resource, instance);
@@ -57,7 +57,12 @@ export class Watcher extends Disposable implements IWatcher {
         
         const blocker = new EventBlocker<void>(instance.onReady, Time.sec(1));
         const cancel = toDisposable(() => {
-            instance.close().then((uri) => { if (uri) this._onDidClose.fire(uri); });
+            instance.close().then((uri) => { 
+                if (uri) {
+                    this._onDidClose.fire(uri);
+                }
+                this.release(instance);
+            });
             this._instances.delete(request.resource);
         });
 
@@ -82,7 +87,6 @@ export class Watcher extends Disposable implements IWatcher {
 }
 
 
-
 /**
  * @class A `WatchInstance` starts to watch the request on the given filesystem
  * path once constructed. It is build upon the third library chokidar and does
@@ -97,7 +101,7 @@ export class Watcher extends Disposable implements IWatcher {
  * 
  * See more info about chokidar from https://github.com/paulmillr/chokidar
  */
-export class WatchInstance implements IWatchInstance {
+export class WatchInstance extends Disposable implements IWatchInstance {
 
     // [field]
 
@@ -106,7 +110,7 @@ export class WatchInstance implements IWatchInstance {
      * @note milliseconds
      */
     public static readonly FILE_CHANGE_DELAY = Time.ms(50);
-    private readonly _changeDebouncer = new ThrottleDebouncer<void>(WatchInstance.FILE_CHANGE_DELAY);
+    private readonly _changeDebouncer = this.__register(new ThrottleDebouncer<void>(WatchInstance.FILE_CHANGE_DELAY));
 
     private _eventBuffer: IRawResourceChangeEvent[] = [];
     private _anyDirectory = false;
@@ -120,7 +124,7 @@ export class WatchInstance implements IWatchInstance {
     private readonly _request: IWatchRequest;
     private readonly _onDidChange: (event: IRawResourceChangeEvents) => void;
     
-    private readonly _onReady = new Emitter<void>();
+    private readonly _onReady = this.__register(new Emitter<void>());
     public readonly onReady = this._onReady.registerListener;
 
 
@@ -131,6 +135,7 @@ export class WatchInstance implements IWatchInstance {
         request: IWatchRequest,
         onDidChange: (event: IRawResourceChangeEvents) => void,
     ) {
+        super();
         this._request = request;
         (<Mutable<RegExp[]>>this._request.exclude) = this._request.exclude ?? [];
         this._onDidChange = onDidChange;
@@ -147,7 +152,7 @@ export class WatchInstance implements IWatchInstance {
             return;
         }
 
-        this._changeDebouncer.dispose();
+        this.release(this._changeDebouncer);
         await this._watcher.close();
         this._watcher = undefined;
 
@@ -163,6 +168,11 @@ export class WatchInstance implements IWatchInstance {
             this.logService?.error(`Error encounters on watching the resource '${resource}'`, error);
             panic(error);
         }
+    }
+
+    public override dispose(): void {
+        this.close();
+        super.dispose();
     }
 
     // [private helper methods]

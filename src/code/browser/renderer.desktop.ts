@@ -44,7 +44,7 @@ import { ILayoutService, LayoutService } from "src/workbench/services/layout/lay
 import { INotificationService, NotificationService } from "src/workbench/services/notification/notificationService";
 import { IShortcutService, ShortcutService } from "src/workbench/services/shortcut/shortcutService";
 import { IThemeService, ThemeService } from "src/workbench/services/theme/themeService";
-import { rendererWorkbenchCommandRegister } from "src/workbench/services/workbench/command.register";
+import { rendererTitleBarFileCommandRegister, rendererWorkbenchCommandRegister } from "src/workbench/services/workbench/command.register";
 import { FileTreeService } from "src/workbench/services/fileTree/fileTreeService";
 import { IFileTreeMetadataService, IFileTreeService } from "src/workbench/services/fileTree/treeService";
 import { IClipboardService } from "src/platform/clipboard/common/clipboard";
@@ -67,7 +67,6 @@ import { MenuRegistrant } from "src/platform/menu/browser/menuRegistrant";
 import { I18nService, II18nService } from "src/platform/i18n/browser/i18nService";
 import { IRecentOpenService, RecentOpenService } from "src/platform/app/browser/recentOpenService";
 import { EditorPaneRegistrant } from "src/workbench/services/editorPane/editorPaneRegistrant";
-import { AllCommands } from "src/workbench/services/workbench/commandList";
 
 /**
  * @class This is the main entry of the renderer process.
@@ -95,13 +94,7 @@ const renderer = new class extends class RendererInstance extends Disposable {
             monitorDisposableLeak(toBoolean(WIN_CONFIGURATION.disposableLeakWarning));
             
             // ensure we handle almost every errors properly
-            initGlobalErrorHandler(() => undefined, WIN_CONFIGURATION, err => {
-                const commandService = instantiationService?.getOrCreateService(ICommandService);
-                if (!commandService) {
-                    return;
-                }
-                commandService.executeCommand(AllCommands.alertError, 'Renderer', err);
-            });
+            initGlobalErrorHandler(() => this.logService, WIN_CONFIGURATION);
 
             // register microservices
             this.rendererServiceRegistrations();
@@ -178,10 +171,11 @@ const renderer = new class extends class RendererInstance extends Disposable {
             // console-logger
             new ConsoleLogger(environmentService.mode === ApplicationMode.DEVELOP ? environmentService.logLevel : LogLevel.WARN),
             // file-logger
-            loggerService.createLogger(environmentService.logPath, {
-                name: `window-${environmentService.windowID}-${getFormatCurrTimeStamp()}.txt`,
-                description: `renderer`,
-            }),
+            loggerService.createLogger(
+                URI.join(environmentService.logPath, `window-${environmentService.windowID}-${getFormatCurrTimeStamp()}.txt`), 
+                {
+                    description: `renderer`,
+                }),
         ]);
         logService.setLogger(logger);
 
@@ -311,6 +305,7 @@ const renderer = new class extends class RendererInstance extends Disposable {
                 super.initRegistrations(provider);
                 [
                     rendererWorkbenchCommandRegister,
+                    rendererTitleBarFileCommandRegister,
                 ]
                 .forEach(register => register(provider));
             }
