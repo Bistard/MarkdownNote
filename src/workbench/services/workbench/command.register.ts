@@ -5,7 +5,6 @@ import { RegistrantType, createRegister } from "src/platform/registrant/common/r
 import { FileCommands } from "src/workbench/services/fileTree/fileCommands";
 import { Command } from "src/platform/command/common/command";
 import { IServiceProvider } from "src/platform/instantiation/common/instantiation";
-import { INotificationService } from "src/workbench/services/notification/notificationService";
 import { errorToMessage } from "src/base/common/utilities/panic";
 import { ILogService } from "src/base/common/logger";
 import { IBrowserZoomService } from "src/workbench/services/zoom/zoomService";
@@ -16,9 +15,9 @@ import { IFileTreeService } from "src/workbench/services/fileTree/treeService";
 import { IS_WINDOWS } from "src/base/common/platform";
 import { IBrowserInspectorService } from "src/platform/inspector/common/inspector";
 import { INavigationViewService } from "src/workbench/parts/navigationPanel/navigationView/navigationView";
-import { ExplorerView, openFolderAtExplorerView } from "src/workbench/contrib/explorer/explorer";
+import { ExplorerView } from "src/workbench/contrib/explorer/explorer";
 import { IRecentOpenService } from "src/platform/app/browser/recentOpenService";
-import { IDialogService } from "src/platform/dialog/browser/browserDialogService";
+import { INotificationService } from "src/workbench/services/notification/notification";
 
 export const rendererWorkbenchCommandRegister = createRegister(
     RegistrantType.Command, 
@@ -149,7 +148,7 @@ export const rendererWorkbenchCommandRegister = createRegister(
         registrant.registerCommandBasic({
             id: AllCommands.fileTreeOpenFolder,
             command: async (provider, target: URI) => {
-                return openFolderAtExplorerView(provider, target);
+                provider.getOrCreateService(INavigationViewService).selectFolderAndOpen(target);
             }
         });
         registrant.registerCommandBasic(
@@ -170,17 +169,8 @@ export const rendererTitleBarFileCommandRegister = createRegister(
     (registrant) => {
         registrant.registerCommandBasic({
             id: AllCommands.openFolderDialog, 
-            command: async (provider) => {
-                const dialogService = provider.getOrCreateService(IDialogService);
-                const paths = await dialogService.openDirectoryDialog({ 
-                    title: 'Open a Folder', // todo: i18n
-                });
-
-                if (paths.length === 0) {
-                    return;
-                }
-                const uri = URI.fromFile(paths.at(-1)!);
-                await openFolderAtExplorerView(provider, uri);
+            command: async (provider) => { 
+                provider.getOrCreateService(INavigationViewService).selectFolderAndOpen(null); 
             }
         });
     }

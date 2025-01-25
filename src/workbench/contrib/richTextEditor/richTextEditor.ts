@@ -1,3 +1,4 @@
+import { loadCSS } from "src/base/browser/basic/dom";
 import { ErrorHandler, tryOrDefault } from "src/base/common/error";
 import { URI } from "src/base/common/files/uri";
 import { ILogService } from "src/base/common/logger";
@@ -21,6 +22,11 @@ export class RichTextEditor extends EditorPaneView<TextEditorPaneModel> {
     private _outline?: OutlineTree;
 
     /**
+     * A universal identifier if KaTex style is loaded.
+     */
+    public static everLoadedKaTeXCss: boolean;
+
+    /**
      * Stores editor open request. A throttler is needed to avoid excessive file
      * loading during a very short time.
      */
@@ -34,6 +40,7 @@ export class RichTextEditor extends EditorPaneView<TextEditorPaneModel> {
         @IConfigurationService private readonly configurationService: IConfigurationService,
     ) {
         super(instantiationService);
+        ensureLoadKaTeXCssStyles(this.logService);
     }
 
     // [getter]
@@ -133,4 +140,25 @@ export class RichTextEditor extends EditorPaneView<TextEditorPaneModel> {
         this._outline?.dispose();
         super.dispose();
     }
+}
+
+/**
+ * @description Load the CSS style of KaTeX library if never loaded into DOM.
+ */
+export async function ensureLoadKaTeXCssStyles(logService: ILogService): Promise<void> {
+    if (RichTextEditor.everLoadedKaTeXCss) {
+        return;
+    }
+
+    const href = '../node_modules/katex/dist/katex.min.css';
+    const result = await loadCSS(href);
+    return result.match(
+        () => {
+            RichTextEditor.everLoadedKaTeXCss = true;
+            logService.debug('RichTextEditor', `Successfully loading KaTeX CSS style.`);
+        },
+        err => {
+            ErrorHandler.onUnexpectedError(err);
+        }
+    );
 }

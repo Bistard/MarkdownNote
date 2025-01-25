@@ -80,7 +80,8 @@
 			"ts-node": "TypeScript execution environment for node.",
 			"tsconfig-paths": "Load node modules using paths from tsconfig.",
 			"typescript": "JavaScript superset offering static type checking.",
-			"webpack and related packages": "Module bundler and its various plugins/loaders."
+			"webpack and related packages": "Module bundler and its various plugins/loaders.",
+			"katex": "Renders plain text into math equations."
 		},
 		"dependencies": {
 			"chokidar": "Filesystem watcher. Used to achieve file watching on different platform.",
@@ -88,8 +89,10 @@
 		}
 	},
 	"dependencies": {
+		"@types/katex": "^0.16.7",
 		"chokidar": "^3.5.3",
 		"codemirror": "^6.0.1",
+		"katex": "^0.16.21",
 		"marked": "^14.1.3",
 		"minimist": "^1.2.8",
 		"openai": "^4.28.0",

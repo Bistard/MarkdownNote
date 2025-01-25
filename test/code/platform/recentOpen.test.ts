@@ -5,20 +5,22 @@ import { FileType } from 'src/base/common/files/file';
 import { URI } from 'src/base/common/files/uri';
 import { IHostService } from 'src/platform/host/common/hostService';
 import { StatusKey } from 'src/platform/status/common/status';
-import { createNullHostService, NullBrowserEnvironmentService, NullLogger } from 'test/utils/testService';
+import { NullBrowserEnvironmentService, NullLogger } from 'test/utils/testService';
 import { IRecentOpenService, RecentOpenService } from 'src/platform/app/browser/recentOpenService';
 import { IRegistrantService, RegistrantService } from 'src/platform/registrant/common/registrantService';
-import { IMenuRegistrant, MenuRegistrant } from 'src/platform/menu/browser/menuRegistrant';
+import { MenuRegistrant } from 'src/platform/menu/browser/menuRegistrant';
 import { ContextService } from 'src/platform/context/common/contextService';
 import { InstantiationService } from 'src/platform/instantiation/common/instantiation';
 import { MenuTypes } from 'src/platform/menu/common/menu';
+import { createIntegration } from 'test/utils/integration';
+import { RegistrantType } from 'src/platform/registrant/common/registrant';
 
-suite('RecentOpenUtility', () => {
+suite('RecentOpenUtility', async () => {
 
-    let hostService!: IHostService;
+    const di = await createIntegration({ hostService: true });
+    const hostService = di.getOrCreateService(IHostService);
 
     beforeEach(() => {
-        hostService = createNullHostService();
         hostService.setApplicationStatus(StatusKey.OpenRecent, [
             '/path/to/file.txt|{"targetType":"file","pinned":true,"gotoLine":42}',
             '/path/to/directory|{"targetType":"directory","pinned":false}',
@@ -105,31 +107,29 @@ suite('RecentOpenUtility', () => {
     });
 });
 
-suite('RecentOpenService', () => {
+suite('RecentOpenService', async () => {
 
+    
     let hostService!: IHostService;
     let recentOpenService!: IRecentOpenService;
     let menuRegistrant!: MenuRegistrant;
 
-    beforeEach(() => {
-        hostService = createNullHostService();
+    beforeEach(async () => {
+        const di = await createIntegration({ 
+            hostService: true,
+            registrantService: [RegistrantType.Menu],
+            recentOpenService: true,
+        });
+        
+        hostService = di.getOrCreateService(IHostService);
         hostService.setApplicationStatus(StatusKey.OpenRecent, [
             '/path/to/file.txt|{"targetType":"file","pinned":true,"gotoLine":42}',
             '/path/to/directory|{"targetType":"directory","pinned":false}',
             '/path/to/file2.txt|{"targetType":"file","pinned":false,"gotoLine":24}',
             '/path/to/directory2|{"targetType":"directory","pinned":true}',
         ]);
-
-        const di = new InstantiationService();
-        
-        const registrantService = new RegistrantService(new NullLogger());
-        di.store(IRegistrantService, registrantService);
-
-        menuRegistrant = new MenuRegistrant(new ContextService());
-        registrantService.registerRegistrant(menuRegistrant);
-        registrantService.init(di);
-
-        recentOpenService = new RecentOpenService(hostService, registrantService, new NullBrowserEnvironmentService());
+        menuRegistrant = di.getOrCreateService(IRegistrantService).getRegistrant(RegistrantType.Menu);
+        recentOpenService = di.getOrCreateService(IRecentOpenService);
     });
 
     test('getRecentOpened should return the most recent opened item', async () => {

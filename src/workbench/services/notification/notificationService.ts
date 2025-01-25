@@ -1,45 +1,16 @@
 import 'src/workbench/services/notification/notification.scss';
-import { Disposable, disposeAll, IDisposable } from "src/base/common/dispose";
-import { IService, createService } from "src/platform/instantiation/common/decorator";
+import { Disposable, disposeAll } from "src/base/common/dispose";
 import { NotificationInstance } from 'src/workbench/services/notification/notificationInstance';
 import { Arrays } from 'src/base/common/utilities/array';
 import { errorToMessage } from 'src/base/common/utilities/panic';
 import { Event } from 'src/base/common/event';
 import { Callable } from 'src/base/common/utilities/type';
-
-export const INotificationService = createService<INotificationService>('notification-service');
+import { INotificationService } from 'src/workbench/services/notification/notification';
 
 export const enum NotificationTypes {
     Info = 'info',
     Warning = 'warning',
     Error = 'error'
-}
-
-/**
- * An interface only for {@link NotificationService}.
- */
-export interface INotificationService extends IDisposable, IService {
-    
-    /**
-     * @description Displays a notification with the provided options.
-     */
-    notify(options: INotificationOptions): void;
-    
-    /**
-     * @description Displays a operating system based confirmation dialog and 
-     * let the user to confirm or deny.
-     * @param message The main message to display.
-     * @param subMessage The optional sub-message for more details.
-     * @returns A promise that resolves to `true` if the user confirms, 
-     *          otherwise `false`.
-     */
-    confirm(message: string, subMessage: string): Promise<boolean>;
-
-    /**
-     * @description A convenient way of invoking `this.notify({ type: 'error', ... })`.
-     * @param error The error to display.
-     */
-    error(error: string | Error, options: Omit<INotificationOptions, 'type' | 'message'>): void;
 }
 
 /**

@@ -3,7 +3,7 @@ import { Schemas, URI } from 'src/base/common/files/uri';
 import { FileService } from 'src/platform/files/common/fileService';
 import { DiskFileSystemProvider } from 'src/platform/files/node/diskFileSystemProvider';
 import { I18nService } from 'src/platform/i18n/browser/i18nService';
-import { LanguageType } from 'src/platform/i18n/common/localeTypes';
+import { LanguageType } from 'src/platform/i18n/common/i18n';
 import { file1 } from 'test/build/i18n/src/file1';
 import { file2 } from 'test/build/i18n/src/file2';
 import { file3 } from 'test/build/i18n/src/file3';

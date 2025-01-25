@@ -9,7 +9,6 @@ import { IFileService } from "src/platform/files/common/fileService";
 import { ILogService } from "src/base/common/logger";
 import { Time } from "src/base/common/date";
 import { Disposable, IDisposable, toDisposable } from "src/base/common/dispose";
-import { INotificationService } from "src/workbench/services/notification/notificationService";
 import { DomUtility } from "src/base/browser/basic/dom";
 import { IConfigurationService } from "src/platform/configuration/common/configuration";
 import { FileSortType, IFileTreeSorter } from "src/workbench/services/fileTree/fileTreeSorter";
@@ -22,6 +21,7 @@ import { ICommandService } from "src/platform/command/common/commandService";
 import { AllCommands } from "src/workbench/services/workbench/commandList";
 import { IWorkbenchService } from "src/workbench/services/workbench/workbenchService";
 import { WorkbenchContextKey } from "src/workbench/services/workbench/workbenchContextKeys";
+import { INotificationService } from "src/workbench/services/notification/notification";
 
 /**
  * @class A type of {@link IListDragAndDropProvider} to support drag and drop

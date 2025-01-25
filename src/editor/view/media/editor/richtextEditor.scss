@@ -14,9 +14,14 @@
         background-color: #ddedff;
     }
 
+    // make sure every block always have a small space before touching the end
+    & > * {
+        padding-right: 22px;
+    }
+
     & blockquote {
-        border-left: 4px solid #5a564d;
-        padding-left: 16px;
+        border-left: 3px solid #767268;
+        padding-left: 22px;
         padding-top: 1px;
         padding-bottom: 1px;
 
@@ -25,12 +30,21 @@
         background-color: #f9f9f9;
     }
 
+    // outer blockquote: 4px border-left rather than 3px.
+    & > blockquote {
+        border-left: 4px solid #5a564d;
+
+        // leave some spaces between the content and the outer blockquote
+        padding-top: 22px;
+        padding-bottom: 22px;
+    }
+
     & p {
-        margin: 4px 0;
+        margin: 8px 0;
     }
 
     & h1, & h2, & h3, & h4, & h5, & h6 {
-        margin: 24px 0 16px;
+        margin: 22px 0 16px;
         line-height: 1.2;
     }
     & h1 { font-size: 2em; }
@@ -42,7 +56,7 @@
 
     & ul, & ol {
         margin: 4px 0;
-        padding-left: 40px;
+        padding-left: calc(22px + 2px);
     }
 
     & li::marker {
@@ -55,21 +69,30 @@
         padding: 16px;
         border-radius: 4px;
         overflow-x: auto;
-        font-family: 'Courier New', monospace;
+        font-family: 'Consolas', monospace;
         font-size: 14px;
     }
     
     & code {
         background-color: #f0f0f0;
-        padding: 2px 4px;
         border-radius: 6px;
-        font-family: 'Courier New', monospace;
+        font-family: 'Consolas', monospace;
+        padding: 2px 4px;
+        // consolas looks bigger than normal text, we reduce for 1 px to maintain balance.
+        font-size: 90%;
     }
 
     & .cm-editor {
         background-color: #f9f9f9;
-        padding: 2px 4px;
-        border-radius: 3px;
+        border-radius: 6px;
+        outline: none;
+        padding: 22px;
+
+        & .cm-line {
+            font-family: 'Consolas', monospace;
+            // Consolas looks bigger than normal text, we reduce for 1 px to maintain balance.
+            font-size: 90%;
+        }
     }
 
     & a {
@@ -88,6 +111,29 @@
         border: 0;
         height: 2px;
         background: #ddd;
-        margin: 8px 0;
+        margin: 22px 0;
+    }
+
+    & .math-block {
+
+        // animation: background color
+        background-color: transparent;
+        transition: background-color 0.3s ease;
+        &:hover {
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+
+        &.empty {
+            display: flex;
+            justify-content: center; // horizontal align
+            align-items: center; // vertical align
+
+            min-height: 50px;
+            
+            font-family: 'sans-serif';
+            font-style: italic;
+            font-size: 18px;
+        }
     }
 }

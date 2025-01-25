@@ -18,6 +18,7 @@ import { MarkdownSerializer } from "src/editor/model/serializer";
 import { IFileService } from "src/platform/files/common/fileService";
 import { history } from "prosemirror-history";
 import { IOnDidContentChangeEvent } from "src/editor/view/proseEventBroadcaster";
+import { IInstantiationService } from "src/platform/instantiation/common/instantiation";
 
 export class EditorModel extends Disposable implements IEditorModel {
 
@@ -60,13 +61,14 @@ export class EditorModel extends Disposable implements IEditorModel {
         options: EditorOptionsType,
         @IFileService private readonly fileService: IFileService,
         @ILogService private readonly logService: ILogService,
+        @IInstantiationService instantiationService: IInstantiationService,
     ) {
         super();
         this._source = source;
         this._options = options;
         this._lexer = new MarkdownLexer(this.__initLexerOptions(options));
 
-        const nodeProvider = DocumentNodeProvider.create().register();
+        const nodeProvider = DocumentNodeProvider.create(instantiationService).register();
         this._schema = buildSchema(nodeProvider);
         this._docParser = this.__register(new DocumentParser(this._schema, nodeProvider, /* options */));
         this.__register(this._docParser.onLog(event => defaultLog(logService, event.level, 'EditorView', event.message, event.error, event.additional)));

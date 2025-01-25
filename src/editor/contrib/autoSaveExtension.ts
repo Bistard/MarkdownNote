@@ -5,7 +5,7 @@ import { EditorExtension, IEditorExtension } from "src/editor/common/editorExten
 import { EditorExtensionIDs } from "src/editor/contrib/builtInExtensionList";
 import { IEditorWidget } from "src/editor/editorWidget";
 import { IConfigurationService } from "src/platform/configuration/common/configuration";
-import { INotificationService } from "src/workbench/services/notification/notificationService";
+import { INotificationService } from "src/workbench/services/notification/notification";
 import { WorkbenchConfiguration } from "src/workbench/services/workbench/configuration.register";
 
 interface IEditorAutoSaveExtension extends IEditorExtension {

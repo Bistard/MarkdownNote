@@ -6,13 +6,13 @@ import { Disposable, DisposableBucket, IDisposable } from "src/base/common/dispo
 import { ILayoutService } from "src/workbench/services/layout/layoutService";
 import { IService, createService } from "src/platform/instantiation/common/decorator";
 import { isCancellationError } from "src/base/common/error";
-import { INotificationService } from "src/workbench/services/notification/notificationService";
 import { isDefined } from "src/base/common/utilities/type";
 import { MenuTypes } from "src/platform/menu/common/menu";
 import { RegistrantType } from "src/platform/registrant/common/registrant";
 import { ICommandService } from "src/platform/command/common/commandService";
 import { IRegistrantService } from "src/platform/registrant/common/registrantService";
 import { IContextService } from "src/platform/context/common/contextService";
+import { INotificationService } from "src/workbench/services/notification/notification";
 
 export const IContextMenuService = createService<IContextMenuService>('context-menu-service');
 

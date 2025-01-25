@@ -21,7 +21,7 @@ export const THEME_COLORS = <const> {
     subicon:             assert(Color.parseHex('#cccccc')),
     stroke:              assert(Color.parseHex('#e2e2e2')),
     lightstroke:         assert(Color.parseHex('#eaeaea')),
-    light:               assert(Color.parseHex('#fcf3f3')), // FIX: this color is not even a gray.
+    light:               assert(Color.parseHex('#f0f0f0')),
     sidebg:              assert(Color.parseHex('#fcfcfc')),
 
     // utility

@@ -6,6 +6,7 @@ import { fileExists } from "src/base/node/io";
 import { ASNIForegroundColor, TextColors } from 'src/base/common/color';
 import { Pair } from 'src/base/common/utilities/type';
 import { errorToMessage } from 'src/base/common/utilities/panic';
+import { initGlobalCssVariables } from 'src/base/browser/basic/dom';
 
 /**
  * This file will be attached before mocha runs the unit tests.
@@ -28,6 +29,8 @@ const hook = new class extends class GlobalHooks {
     constructor() {
         this._unhandled = { exceptions: [], rejections: [] };
         this._currentTest = undefined;
+
+        initGlobalCssVariables();
     }
 
     // [public methods]

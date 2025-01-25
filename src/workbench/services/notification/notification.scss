@@ -1,5 +1,3 @@
-@use 'src/styles/settings/constants' as const;
-
 @media only screen and (max-width: 670px) {
     .notification-container {
         display: none;
@@ -10,7 +8,7 @@
 .notification-container {
     
     // notification is overlay, it should have high z-index.
-    z-index: const.$z-index-medium;
+    z-index: var(--z-index-medium);
 
     position: fixed;
     bottom: 20px;

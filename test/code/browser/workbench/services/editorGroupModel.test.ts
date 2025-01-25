@@ -3,15 +3,22 @@ import { suite, test } from 'mocha';
 import { TextEditorPaneModel } from 'src/workbench/services/editorPane/editorPaneModel';
 import { URI } from 'src/base/common/files/uri';
 import { EditorGroupChangeType, EditorGroupModel, EditorGroupOpenPositioning, IEditorGroupChangeEvent } from 'src/workbench/parts/workspace/editorGroupModel';
-import { createTestConfigurationService } from 'test/utils/testService';
 import { ConfigurationModuleType, IConfigurationService } from 'src/platform/configuration/common/configuration';
 import { WorkbenchConfiguration } from 'src/workbench/services/workbench/configuration.register';
 import { FakeAsync } from 'test/utils/fakeAsync';
+import { createIntegration } from 'test/utils/integration';
+import { RegistrantType } from 'src/platform/registrant/common/registrant';
 
 suite('EditorGroupModel Test', () => {
     
     async function initEditorGroupModel(): Promise<[EditorGroupModel, IConfigurationService]> {
-        const configurationService = await createTestConfigurationService();
+        const di = await createIntegration({ 
+            fileService: 'inMemory',
+            registrantService: [RegistrantType.Configuration],
+            configurationService: true,
+        });
+        
+        const configurationService = di.getOrCreateService(IConfigurationService);
         await configurationService.set(WorkbenchConfiguration.EditorOpenPositioning, EditorGroupOpenPositioning.Last, { type: ConfigurationModuleType.User });
         return [
             new EditorGroupModel(configurationService),

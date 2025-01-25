@@ -17,7 +17,7 @@ import { panic } from "src/base/common/utilities/panic";
 import { Arrays } from "src/base/common/utilities/array";
 import { IConfigurationService } from "src/platform/configuration/common/configuration";
 import { WorkbenchConfiguration } from "src/workbench/services/workbench/configuration.register";
-import { LanguageType, validateLanguageType } from "src/platform/i18n/common/localeTypes";
+import { LanguageType, validateLanguageType } from "src/platform/i18n/common/i18n";
 
 export const IMainWindowService = createService<IMainWindowService>('main-window-service');
 

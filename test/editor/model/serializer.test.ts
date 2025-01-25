@@ -1,47 +1,50 @@
 import * as assert from 'assert';
 import { defaultLog } from 'src/base/common/logger';
-import { Strings } from 'src/base/common/utilities/string';
 import { MarkdownLexer } from 'src/editor/model/markdownLexer';
 import { DocumentNodeProvider } from 'src/editor/model/documentNode/documentNodeProvider';
 import { DocumentParser } from 'src/editor/model/parser';
 import { buildSchema } from 'src/editor/model/schema';
 import { IncrementalDelimiter, MarkdownSerializer } from 'src/editor/model/serializer';
 import { ConsoleLogger } from 'src/platform/logger/common/consoleLoggerService';
+import { createIntegration } from 'test/utils/integration';
 
-const nodeProvider = DocumentNodeProvider.create().register();
-const schema = buildSchema(nodeProvider);
-const lexer = new MarkdownLexer({});
-const docParser = new DocumentParser(schema, nodeProvider, /* options */);
-const serializer = new MarkdownSerializer(nodeProvider, { strict: true, escapeExtraCharacters: undefined, });
-docParser.onLog(e => defaultLog(new ConsoleLogger(), e.level, 'serializer.test.ts', e.message, e.error, e.additional));
-
-/**
- * @description Expecting the serialized output is exactly the same as the 
- * input.
- */
-function expectSame(content: string): void {
-    expectSameTo(content, content);
-}
-
-function expectSameTo(content: string, expect: string): void {
-    const serializedContent = parseAndSerialize(content);
-
-    // console.log('[input ]', Strings.escape(content));
-    // console.log('[expect]', `(${Strings.escape(expect)})`);
-    // console.log('[actual]', `(${Strings.escape(serializedContent)})`);
-
-    assert.strictEqual(expect, serializedContent);
-}
-
-function parseAndSerialize(content: string): string {
-    const tokens = lexer.lex(content);
-    const doc = docParser.parse(tokens);
-    const serializedContent = serializer.serialize(doc);
-    return serializedContent;
-}
-
-suite('MarkdownSerializer', () => {
+suite('MarkdownSerializer', async () => {
     
+    const di = await createIntegration({ 
+        i18nService: true 
+    });
+    const nodeProvider = DocumentNodeProvider.create(di).register();
+    const schema = buildSchema(nodeProvider);
+    const lexer = new MarkdownLexer({});
+    const docParser = new DocumentParser(schema, nodeProvider, /* options */);
+    const serializer = new MarkdownSerializer(nodeProvider, { strict: true, escapeExtraCharacters: undefined, });
+    docParser.onLog(e => defaultLog(new ConsoleLogger(), e.level, 'serializer.test.ts', e.message, e.error, e.additional));
+
+    /**
+     * @description Expecting the serialized output is exactly the same as the 
+     * input.
+     */
+    function expectSame(content: string): void {
+        expectSameTo(content, content);
+    }
+
+    function expectSameTo(content: string, expect: string): void {
+        const serializedContent = parseAndSerialize(content);
+
+        // console.log('[input ]', Strings.escape(content));
+        // console.log('[expect]', `(${Strings.escape(expect)})`);
+        // console.log('[actual]', `(${Strings.escape(serializedContent)})`);
+
+        assert.strictEqual(expect, serializedContent);
+    }
+
+    function parseAndSerialize(content: string): string {
+        const tokens = lexer.lex(content);
+        const doc = docParser.parse(tokens);
+        const serializedContent = serializer.serialize(doc);
+        return serializedContent;
+    }
+
     suite('IncrementalDelimiter', () => {
         suite('constructor', () => {
             test('should use the provided default delimiter', () => {

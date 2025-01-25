@@ -4,6 +4,12 @@ import { Emitter, Register } from 'src/base/common/event';
 import { IService, createService } from 'src/platform/instantiation/common/decorator';
 import { IInstantiationService } from 'src/platform/instantiation/common/instantiation';
 import { Constructor } from 'src/base/common/utilities/type';
+import { IBrowserDialogService, IDialogService } from 'src/platform/dialog/browser/browserDialogService';
+import { URI } from 'src/base/common/files/uri';
+import { II18nService } from 'src/platform/i18n/browser/i18nService';
+import { ExplorerView } from 'src/workbench/contrib/explorer/explorer';
+import { ExplorerViewID } from 'src/workbench/contrib/explorer/explorerService';
+import { CommonLocalize, getCommonLocalize } from 'src/platform/i18n/common/i18n';
 
 export const INavigationViewService = createService<INavigationViewService>('navigation-view-service');
 
@@ -63,6 +69,13 @@ export interface INavigationViewService extends IComponent, IService {
      * returned if no views are displaying.
      */
     currView<T extends NavView>(): T | undefined;
+
+    /**
+     * @description If `source` not provided, open a dialog to let user pick a 
+     * folder and open it in {@link ExplorerView}. If `source` provided, skip
+     * the dialog step.
+     */
+    selectFolderAndOpen(source: URI | null): Promise<void>;
 }
 
 /**
@@ -91,6 +104,8 @@ export class NavigationView extends Component implements INavigationViewService 
 
     constructor(
         @IInstantiationService instantiationService: IInstantiationService,
+        @IDialogService private readonly dialogService: IBrowserDialogService,
+        @II18nService private readonly i18nService: II18nService,
     ) {
         super('navigation-view', null, instantiationService);
         this._cachedView = new Map();
@@ -166,6 +181,24 @@ export class NavigationView extends Component implements INavigationViewService 
             return this.getChild<T>(this._currView.id);
         }
         return undefined;
+    }
+
+    public async selectFolderAndOpen(source: URI | null): Promise<void> {
+        if (!source) {
+            const paths = await this.dialogService.openDirectoryDialog({ 
+                title: getCommonLocalize(this.i18nService, CommonLocalize.openDirectory),
+            });
+            if (paths.length === 0) {
+                return;
+            }
+            source = URI.fromFile(paths.at(-1)!);
+        }
+
+        const explorerView = <ExplorerView>this.switchView(ExplorerViewID);
+        if (explorerView.isOpened) {
+            await explorerView.close();
+        }
+        await explorerView.open(source);
     }
 
     // [protected override methods]

@@ -1,5 +1,7 @@
-import { marked } from "marked";
+import { Marked } from "marked";
 import { EditorToken } from "src/editor/common/model";
+import { createMathInlineTokenizer } from "src/editor/model/documentNode/mark/mathInline";
+import { createMathBlockTokenizer } from "src/editor/model/documentNode/node/mathBlock";
 
 /**
  * The options for markdown parsing.
@@ -49,20 +51,26 @@ export class MarkdownLexer implements IMarkdownLexer {
 
     // [field]
 
+    private readonly _marked: Marked;
     private readonly _parseOpts: IMarkdownLexerOptions;
     
     // [constructor]
 
     constructor(options?: IMarkdownLexerOptions) {
+        this._marked = new Marked({
+            silent: false,
+            extensions: [
+                createMathInlineTokenizer({ nonStandard: true }),
+                createMathBlockTokenizer(),
+            ]
+        });
         this._parseOpts = options ?? getDefaultLexerOptions();
     }
 
     // [public methods]
 
     public lex(text: string): EditorToken[] {
-        const tokens = marked.lexer(text, {
-            silent: false,
-        });
+        const tokens = this._marked.lexer(text);
         return tokens;
     }
 

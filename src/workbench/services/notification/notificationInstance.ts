@@ -1,4 +1,3 @@
-import { INotificationOptions, INotificationAction, NotificationTypes } from './notificationService';
 import { IDisposable, Disposable } from 'src/base/common/dispose';
 import { Button } from 'src/base/browser/basic/button/button';
 import { Icons } from 'src/base/browser/icon/icons';
@@ -7,6 +6,7 @@ import { IUnbufferedScheduler, UnbufferedScheduler } from 'src/base/common/utili
 import { Time } from 'src/base/common/date';
 import { EventType, addDisposableListener } from 'src/base/browser/basic/dom';
 import { Emitter, Register } from 'src/base/common/event';
+import { NotificationTypes, INotificationOptions, INotificationAction } from 'src/workbench/services/notification/notificationService';
 
 /**
  * An interface only for {@link NotificationInstance}.

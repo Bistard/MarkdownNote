@@ -36,6 +36,17 @@ export namespace EditorTokens {
     export type Br = marked.Tokens.Br;
     export type Del = marked.Tokens.Del;
     export type Generic = marked.Tokens.Generic;
+
+    export type MathBlock = {
+        type: 'mathBlock',
+        raw: string,
+        text: string,
+    };
+    export type MathInline = {
+        type: 'mathInline',
+        raw: string,
+        text: string,
+    };
 }
 
 /**

@@ -1,3 +1,5 @@
+import { II18nService } from "src/platform/i18n/browser/i18nService";
+
 /**
  * @enum LanguageType
  * Defines the supported languages for the application.
@@ -19,4 +21,18 @@ export function validateLanguageType(raw: string): LanguageType {
         default:
             return LanguageType.preferOS;
     }
+}
+
+let COMMON_LOCALIZE: Record<CommonLocalize, string>;
+export const enum CommonLocalize {
+    openDirectory = 'openDirectory',
+}
+
+export function getCommonLocalize(i18nService: II18nService, en: CommonLocalize): string {
+    if (!COMMON_LOCALIZE) {
+        COMMON_LOCALIZE = {
+            [CommonLocalize.openDirectory]: i18nService.localize('openDirectory', 'Open a Folder'),
+        };
+    }
+    return COMMON_LOCALIZE[en] ?? i18nService.localize('missingTranslation', 'MISSING_TRANSLATION');
 }

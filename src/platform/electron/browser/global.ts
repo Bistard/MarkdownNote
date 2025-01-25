@@ -17,10 +17,10 @@ import { ErrorHandler } from "src/base/common/error";
  * The trick to fix this is by using a init function.
  */
 
-export const ipcRenderer: IpcRenderer = <any>{};
-export const process: ISandboxProcess = <any>{};
-export const webFrame: IWebFrame = <any>{};
-export const WIN_CONFIGURATION: IWindowConfiguration = <any>{};
+export let ipcRenderer: IpcRenderer = <any>{};
+export let process: ISandboxProcess = <any>{};
+export let webFrame: IWebFrame = <any>{};
+export let WIN_CONFIGURATION: IWindowConfiguration = <any>{};
 
 /**
  * @description Once renderer process starts, we need to retrieve the APIs that

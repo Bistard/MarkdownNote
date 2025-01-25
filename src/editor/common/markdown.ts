@@ -18,6 +18,8 @@ export const enum TokenEnum {
     Escape = 'escape',
     Image = 'image',
     LineBreak = 'br',
+    MathBlock = 'mathBlock',
+    MathInline = 'mathInline',
 }
 
 export const enum MarkEnum {

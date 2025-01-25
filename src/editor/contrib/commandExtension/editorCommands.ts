@@ -12,10 +12,8 @@ import { CreateContextKeyExpr } from "src/platform/context/common/contextKeyExpr
 import { IServiceProvider } from "src/platform/instantiation/common/instantiation";
 import { EditorContextKeys } from "src/editor/common/editorContextKeys";
 import { IS_MAC } from "src/base/common/platform";
-import { INotificationService } from "src/workbench/services/notification/notificationService";
 import { redo, undo } from "prosemirror-history";
-import { EditorExtensionIDs } from "src/editor/contrib/builtInExtensionList";
-import { IEditorHistoryExtension } from "src/editor/contrib/historyExtension/historyExtension";
+import { INotificationService } from "src/workbench/services/notification/notification";
 
 /**
  * [FILE OUTLINE]

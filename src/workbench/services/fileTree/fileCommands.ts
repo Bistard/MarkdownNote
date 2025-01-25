@@ -7,7 +7,7 @@ import { WorkbenchContextKey } from "src/workbench/services/workbench/workbenchC
 import { URI } from "src/base/common/files/uri";
 import { FileItem } from "src/workbench/services/fileTree/fileItem";
 import { IContextService } from "src/platform/context/common/contextService";
-import { INotificationService, NotificationTypes } from "src/workbench/services/notification/notificationService";
+import { NotificationTypes } from "src/workbench/services/notification/notificationService";
 import { IFileService } from "src/platform/files/common/fileService";
 import { FileOperationError, FileOperationErrorType, FileType } from "src/base/common/files/file";
 import * as path from "src/base/common/files/path";
@@ -22,6 +22,7 @@ import { FileSortType } from "src/workbench/services/fileTree/fileTreeSorter";
 import { isNonNullable } from "src/base/common/utilities/type";
 import { IConfigurationService } from "src/platform/configuration/common/configuration";
 import { WorkbenchConfiguration } from "src/workbench/services/workbench/configuration.register";
+import { INotificationService } from "src/workbench/services/notification/notification";
 
 /**
  * @namespace FileCommands Contains a list of useful {@link Command}s that will

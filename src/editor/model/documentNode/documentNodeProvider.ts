@@ -7,6 +7,7 @@ import { DocumentNode, DocumentMark } from "src/editor/model/documentNode/docume
 import { Codespan } from "src/editor/model/documentNode/mark/codespan";
 import { Emphasis } from "src/editor/model/documentNode/mark/emphasis";
 import { Link } from "src/editor/model/documentNode/mark/link";
+import { MathInline } from "src/editor/model/documentNode/mark/mathInline";
 import { Strong } from "src/editor/model/documentNode/mark/strong";
 import { Blockquote } from "src/editor/model/documentNode/node/blockquote";
 import { CodeBlock } from "src/editor/model/documentNode/node/codeBlock";
@@ -17,10 +18,12 @@ import { HTML, InlineHTML } from "src/editor/model/documentNode/node/html";
 import { Image } from "src/editor/model/documentNode/node/image";
 import { LineBreak } from "src/editor/model/documentNode/node/lineBreak";
 import { List, ListItem } from "src/editor/model/documentNode/node/list";
+import { MathBlock } from "src/editor/model/documentNode/node/mathBlock";
 import { Paragraph } from "src/editor/model/documentNode/node/paragraph";
 import { Space } from "src/editor/model/documentNode/node/space";
 import { Text } from "src/editor/model/documentNode/node/text";
 import { EditorSchema, TOP_NODE_NAME } from "src/editor/model/schema";
+import { IInstantiationService } from "src/platform/instantiation/common/instantiation";
 
 /**
  * @class A provider that stores all the registered {@link IDocumentNode}. Those
@@ -46,7 +49,7 @@ export class DocumentNodeProvider {
 
     // [public static methods]
 
-    public static create(): { register: IO<DocumentNodeProvider> } {
+    public static create(instantiationService: IInstantiationService): { register: IO<DocumentNodeProvider> } {
         const provider = new DocumentNodeProvider();
         return {
             /**
@@ -54,26 +57,28 @@ export class DocumentNodeProvider {
              */
             register: () => {
                 // nodes
-                provider.registerNode(new Space());
-                provider.registerNode(new Text());
-                provider.registerNode(new Escape());
-                provider.registerNode(new Paragraph());
-                provider.registerNode(new Blockquote());
-                provider.registerNode(new HorizontalRule());
-                provider.registerNode(new Heading());
-                provider.registerNode(new CodeBlock());
-                provider.registerNode(new List());
-                provider.registerNode(new ListItem());
-                provider.registerNode(new LineBreak());
-                provider.registerNode(new Image());
-                provider.registerNode(new HTML());
-                provider.registerNode(new InlineHTML());
+                provider.registerNode(instantiationService.createInstance(Space));
+                provider.registerNode(instantiationService.createInstance(Text));
+                provider.registerNode(instantiationService.createInstance(Escape));
+                provider.registerNode(instantiationService.createInstance(Paragraph));
+                provider.registerNode(instantiationService.createInstance(Blockquote));
+                provider.registerNode(instantiationService.createInstance(HorizontalRule));
+                provider.registerNode(instantiationService.createInstance(Heading));
+                provider.registerNode(instantiationService.createInstance(CodeBlock));
+                provider.registerNode(instantiationService.createInstance(List));
+                provider.registerNode(instantiationService.createInstance(ListItem));
+                provider.registerNode(instantiationService.createInstance(LineBreak));
+                provider.registerNode(instantiationService.createInstance(Image));
+                provider.registerNode(instantiationService.createInstance(HTML));
+                provider.registerNode(instantiationService.createInstance(InlineHTML));
+                provider.registerNode(instantiationService.createInstance(MathBlock));
+                provider.registerNode(instantiationService.createInstance(MathInline));
 
                 // marks
-                provider.registerMark(new Link());
-                provider.registerMark(new Emphasis());
-                provider.registerMark(new Strong());
-                provider.registerMark(new Codespan());
+                provider.registerMark(instantiationService.createInstance(Link));
+                provider.registerMark(instantiationService.createInstance(Emphasis));
+                provider.registerMark(instantiationService.createInstance(Strong));
+                provider.registerMark(instantiationService.createInstance(Codespan));
 
                 return provider;
             }

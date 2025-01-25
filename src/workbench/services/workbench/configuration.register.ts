@@ -1,5 +1,5 @@
 import { CollapseState } from "src/base/browser/basic/dom";
-import { LanguageType } from "src/platform/i18n/common/localeTypes";
+import { LanguageType } from "src/platform/i18n/common/i18n";
 import { RegistrantType, createRegister } from "src/platform/registrant/common/registrant";
 import { EditorGroupOpenPositioning } from "src/workbench/parts/workspace/editorGroupModel";
 import { IncrementFileType } from "src/workbench/services/fileTree/fileCommands";

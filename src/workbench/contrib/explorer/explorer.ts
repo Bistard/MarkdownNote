@@ -2,17 +2,16 @@ import 'src/workbench/contrib/explorer/media/explorerItem.scss';
 import 'src/workbench/contrib/explorer/media/explorerView.scss';
 import { Emitter } from 'src/base/common/event';
 import { addDisposableListener, EventType } from 'src/base/browser/basic/dom';
-import { IBrowserDialogService, IDialogService } from 'src/platform/dialog/browser/browserDialogService';
 import { IBrowserEnvironmentService } from 'src/platform/environment/common/environment';
 import { URI } from 'src/base/common/files/uri';
 import { LooseDisposableBucket } from 'src/base/common/dispose';
 import { INavigationViewService, INavView, NavView } from 'src/workbench/parts/navigationPanel/navigationView/navigationView';
 import { IFileOpenEvent, ExplorerViewID, IExplorerViewService } from 'src/workbench/contrib/explorer/explorerService';
 import { IFileTreeService } from 'src/workbench/services/fileTree/treeService';
-import { IInstantiationService, IServiceProvider } from 'src/platform/instantiation/common/instantiation';
-import { II18nService } from 'src/platform/i18n/browser/i18nService';
+import { IInstantiationService } from 'src/platform/instantiation/common/instantiation';
 import { IWorkspaceService } from 'src/workbench/parts/workspace/workspaceService';
-import { TextEditorPaneModel } from 'src/workbench/services/editorPane/editorPaneModel';
+import { CommonLocalize, getCommonLocalize } from 'src/platform/i18n/common/i18n';
+import { II18nService } from 'src/platform/i18n/browser/i18nService';
 
 /**
  * @class Represents an Explorer view within a workbench, providing a UI 
@@ -51,7 +50,6 @@ export class ExplorerView extends NavView implements IExplorerViewService {
     constructor(
         parentElement: HTMLElement,
         @IInstantiationService instantiationService: IInstantiationService,
-        @IDialogService private readonly dialogService: IBrowserDialogService,
         @II18nService private readonly i18nService: II18nService,
         @IWorkspaceService private readonly workspaceService: IWorkspaceService,
         @INavigationViewService private readonly navigationViewService: INavigationViewService,
@@ -214,7 +212,7 @@ export class ExplorerView extends NavView implements IExplorerViewService {
         // the tag
         const tag = document.createElement('div');
         tag.className = 'explorer-open-tag';
-        tag.textContent = this.i18nService.localize('openDirectory', 'Open a Folder');
+        tag.textContent = getCommonLocalize(this.i18nService, CommonLocalize.openDirectory);
         view.appendChild(tag);
 
         return view;
@@ -242,10 +240,7 @@ export class ExplorerView extends NavView implements IExplorerViewService {
         
         this._currViewBucket.register(
             addDisposableListener(tag, EventType.click, async () => {
-                const path = await this.dialogService.openDirectoryDialog({ title: this.i18nService.localize('openDirectory', 'Open a Folder') });
-                if (path.length > 0) {
-                    this.open(URI.fromFile(path.at(-1)!));
-                }
+                this.navigationViewService.selectFolderAndOpen(null);
             })
         );
     }
@@ -268,14 +263,4 @@ export class ExplorerView extends NavView implements IExplorerViewService {
             this.workspaceService.openEditor({ uri: e.item.uri }, {});
         }));
     }
-}
-
-export async function openFolderAtExplorerView(provider: IServiceProvider, uri: URI): Promise<void> {
-    const navigationView = provider.getOrCreateService(INavigationViewService);
-    const explorerView = <ExplorerView>navigationView.switchView(ExplorerViewID);
-    
-    if (explorerView.isOpened) {
-        await explorerView.close();
-    }
-    await explorerView.open(uri);
 }

@@ -12,6 +12,8 @@ import { isString } from 'src/base/common/utilities/type';
 import { URI } from 'src/base/common/files/uri';
 import { IFileService } from 'src/platform/files/common/fileService';
 import { detectEncodingFromFile } from 'src/base/common/files/encoding';
+import { IBrowserLifecycleService, ILifecycleService, LifecyclePhase } from 'src/platform/lifecycle/browser/browserLifecycleService';
+import { ensureLoadKaTeXCssStyles } from 'src/workbench/contrib/richTextEditor/richTextEditor';
 
 export class Workspace extends Component implements IWorkspaceService {
 
@@ -27,6 +29,7 @@ export class Workspace extends Component implements IWorkspaceService {
         @ICommandService private readonly commandService: ICommandService,
         @IInstantiationService instantiationService: IInstantiationService,
         @IFileService private readonly fileService: IFileService,
+        @ILifecycleService private readonly lifecycleService: IBrowserLifecycleService,
     ) {
         super('workspace', null, instantiationService);
     }
@@ -49,7 +52,13 @@ export class Workspace extends Component implements IWorkspaceService {
     }
 
     protected override __registerListeners(): void { 
-        /** noop */ 
+        this.lifecycleService.when(LifecyclePhase.Idle).then(() => {
+            /**
+             * Optimization: If KaTeX style never loaded, we load it when in 
+             * Idle phase.
+             */
+            ensureLoadKaTeXCssStyles(this.logService);
+        });
     }
 
     // [public methods]

@@ -10,8 +10,12 @@
         "platform/i18n/browser/i18nService": {
             "relaunchDisplayLanguageMessage": "重新启动 {name} 以切换到语言：{languageName}?"
         },
-        "workbench/contrib/explorer/explorer": {
+        "platform/i18n/common/i18n": {
+            "missingTranslation": "未知翻译",
             "openDirectory": "打开文件夹"
+        },
+        "editor/model/documentNode/node/mathBlock": {
+            "emptyMathBlock": "空数学公式"
         }
     }
 }

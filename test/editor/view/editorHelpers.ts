@@ -3,6 +3,7 @@ import { pipe } from 'src/base/common/utilities/functional';
 import { ProseEditorState, ProseEditorView, ProseNode, ProseNodeSelection, ProseSchema, ProseTextSelection } from "src/editor/common/proseMirror";
 import { DocumentNodeProvider } from "src/editor/model/documentNode/documentNodeProvider";
 import { buildSchema } from "src/editor/model/schema";
+import { createIntegration } from 'test/utils/integration';
 
 /**
  * Declaring an internal type from {@link NodeBuilder} and {@link MarkBuilder}.
@@ -22,6 +23,10 @@ interface IEditorInfo extends Tag {
     readonly state: ProseEditorState;
     readonly view: ProseEditorView;
 }
+
+const di = await createIntegration({ 
+    i18nService: true 
+});
 
 export namespace ProseUtilsTest {
 
@@ -55,7 +60,7 @@ export namespace ProseUtilsTest {
         strong: { markType: 'strong' },
     });
 
-    const defaultNodeBuilder = pipe(DocumentNodeProvider.create().register(), buildSchema, buildNodeBuilder);
+    const defaultNodeBuilder = pipe(DocumentNodeProvider.create(di).register(), buildSchema, buildNodeBuilder);
 
     const list = <NodeBuilder>defaultNodeBuilder['list']!;
     const ul = (...children: any[]) => defaultNodes.list({ ordered: false }, ...children);
@@ -96,7 +101,7 @@ export namespace ProseUtilsTest {
         const container = document.createElement('div');
 
         // schema
-        const nodeProvider = DocumentNodeProvider.create().register();
+        const nodeProvider = DocumentNodeProvider.create(di).register();
         const schema = buildSchema(nodeProvider);
 
         // build

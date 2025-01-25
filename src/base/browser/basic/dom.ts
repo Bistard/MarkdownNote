@@ -2,12 +2,23 @@ import { FastElement } from "src/base/browser/basic/fastElement";
 import { HexColor } from "src/base/common/color";
 import { Disposable, IDisposable, toDisposable } from "src/base/common/dispose";
 import { Emitter, Register } from "src/base/common/event";
+import { err, ok, Result } from "src/base/common/result";
 import { panic } from "src/base/common/utilities/panic";
 import { Dimension, IDomBox } from "src/base/common/utilities/size";
 import { If, Pair } from "src/base/common/utilities/type";
 
 const BODY = document.body;
 const DocElement = document.documentElement;
+
+export function initGlobalCssVariables(): void {
+	if (!document) {
+		return;
+	}
+
+	document.body.style.setProperty('--z-index-low', '2');
+	document.body.style.setProperty('--z-index-medium', '10');
+	document.body.style.setProperty('--z-index-high', '100');
+}
 
 /**
  * @namespace DomStyle A series of types for DOM styling purpose.
@@ -154,6 +165,20 @@ export function createStyleInCSS(element: HTMLElement): IStyleDisposable {
 		dispose: () => element.removeChild(style),
 		style: style,
 	};
+}
+
+/**
+ * @description Programmatically load a CSS file with given `href` into HTML.
+ */
+export function loadCSS(href: string): Promise<Result<void, Error>> {
+    return new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.onload = () => resolve(ok());
+        link.onerror = error => reject(err(error));
+        document.head.appendChild(link);
+    });
 }
 
 /**
