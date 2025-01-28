@@ -8,6 +8,7 @@
 const fs = require('fs');
 const chokidar = require('chokidar');
 const path = require('path');
+const { execSync } = require('child_process');
 const { log, ScriptHelper } = require('../utility');
 
 const cwd = process.cwd();
@@ -45,6 +46,7 @@ function startWatchChanges() {
         const packageJson = getPackageJson();
         if (packageJson) {
             generateProductJson(packageJson);
+            updatePackageLockJson();
         }
     });
 
@@ -66,7 +68,6 @@ function getPackageJson() {
 function generateProductJson(packageJson) {
     log('info', '[ProductJson] Generating `product.json`...');
 
-    // 这里可以根据自身需求调整生成逻辑
     const productJson = {
         "": [
             "--------------------------------------------------------------------------------------------",
@@ -86,5 +87,15 @@ function generateProductJson(packageJson) {
         log('ok', '[ProductJson] `product.json` generated successfully.\n');
     } catch (error) {
         log('error', '[ProductJson] Failed to write product.json:', error);
+    }
+}
+
+function updatePackageLockJson() {
+    try {
+        log('info', '[ProductJson] Running "npm install --package-lock-only" to update package-lock.json...');
+        execSync('npm install --package-lock-only', { stdio: 'inherit' });
+        log('ok', '[ProductJson] package-lock.json updated successfully.\n');
+    } catch (error) {
+        log('error', `[ProductJson] Failed to update package-lock.json: ${error}`);
     }
 }
