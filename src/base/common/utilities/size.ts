@@ -1,3 +1,7 @@
+export interface ISize {
+	width: number;
+	height: number;
+}
 
 export interface IMeasurable {
 	size: number;
@@ -16,6 +20,13 @@ export interface IPosition {
 export interface ICoordinate {
 	x: number;
 	y: number;
+}
+
+export interface IRect {
+	top: number;
+	left: number;
+	width: number;
+	height: number;
 }
 
 export interface IDomBox extends IDimension, IPosition {}

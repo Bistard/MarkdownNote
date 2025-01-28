@@ -9,6 +9,8 @@ import { IStandardKeyboardEvent } from "src/base/common/keyboard";
 import { FileItem } from "src/workbench/services/fileTree/fileItem";
 import { LogLevel } from "src/base/common/logger";
 import { Dictionary, isTruthy } from "src/base/common/utilities/type";
+import { HoverBox } from "src/base/browser/basic/hoverBox/hoverBox";
+import { IInstantiationService, InstantiationService } from "src/platform/instantiation/common/instantiation";
 
 export interface IFileTreeOpenEvent<T extends FileItem> {
     readonly item: T;
@@ -107,6 +109,7 @@ export class FileTree<T extends FileItem, TFilter> extends AsyncTree<T, TFilter>
         container: HTMLElement,
         rootData: T,
         opts: IFileTreeOptions<T, TFilter>,
+        @IInstantiationService private readonly instantiationService: IInstantiationService,
     ) {
         opts.log?.(LogLevel.DEBUG, 'FileTree', 'FileTree constructing with options:', null, __logFileTreeOptions(opts));
         super(container, rootData, opts);
@@ -145,6 +148,23 @@ export class FileTree<T extends FileItem, TFilter> extends AsyncTree<T, TFilter>
         this.__register(this.onDidChangeFocus(isFocused => {
             this.DOMElement.classList.toggle('blurred', !isFocused);
         }));
+
+        this.onClick(e => {
+            if (!e.data) {
+                return;
+            }
+            const target = this.getHTMLElement(this.getItemIndex(e.data))!;
+            
+            const hoverBox = this.instantiationService.createInstance(HoverBox, {target: target, text: e.data.basename});
+
+            console.log(e.browserEvent.target);
+            const element =  document.createElement('div');
+            document.body.appendChild(element);
+            hoverBox.render(element);
+            
+            console.log(e.data);
+        });
+
     }
 
     private __onClick(event: ITreeMouseEvent<T>): void {
