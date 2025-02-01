@@ -289,8 +289,9 @@ export class ContextMenuView extends Disposable implements IContextMenu {
         let left: number;
 
         const anchorBox = this.__getAnchorBox(delegate);
-        const elementHeight = DomUtility.Attrs.getTotalHeight(this._element.raw);
-        const elementWidth = DomUtility.Attrs.getTotalWidth(this._element.raw);
+        const computed = getComputedStyle(this._element.raw);
+        const elementHeight = DomUtility.Attrs.getTotalHeight(this._element.raw, computed);
+        const elementWidth = DomUtility.Attrs.getTotalWidth(this._element.raw, computed);
 
         const primaryAxisAlignment = delegate.primaryAlignment ?? AnchorPrimaryAxisAlignment.Vertical;
         const horizontalPos = delegate?.horizontalPosition ?? AnchorHorizontalPosition.Right;

@@ -314,7 +314,7 @@ export function observe(types: NonEmptyArray<ObserveType>) {
  */
 export function observable<T extends Constructor>(options: IObservableOptions = DEFAULT_OBSERVABLE_OPTS) {
 
-    const opts = mixin<Required<IObservableOptions>>(options, DEFAULT_OBSERVABLE_OPTS, false);
+    const opts = mixin<Required<IObservableOptions>>(options, DEFAULT_OBSERVABLE_OPTS, { overwrite: false });
     const observer = opts.observer;
     function isFnIgnored(propKey: string): boolean {
         return opts.ignoreUnderscores && propKey.startsWith('_');

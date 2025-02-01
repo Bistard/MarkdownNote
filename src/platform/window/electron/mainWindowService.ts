@@ -225,7 +225,7 @@ export class MainWindowService extends Disposable implements IMainWindowService 
          * application (provided opts, app config, environment and so on). This
          * configuration will be passed when creating a `BrowserWindow`.
          */
-        const configuration = mixin<Mutable<IWindowCreationOptions>>(defaultConfiguration, optionalConfiguration, true);
+        const configuration = mixin<Mutable<IWindowCreationOptions>>(defaultConfiguration, optionalConfiguration, { overwrite: true });
 
         // open a new window instance
         window = this.__openInNewWindow(configuration);
@@ -311,7 +311,7 @@ namespace LocaleResolver {
              * country codes, assume they use Simplified Chinese.
              * For other cases, assume they use Traditional.
              */
-            if (['hans', 'cn', 'sg', 'my'].includes(region)) {
+            if (['hans', 'cn', 'sg', 'my'].includes(region.toLowerCase())) {
                 return 'zh-cn';
             }
             return 'zh-tw';

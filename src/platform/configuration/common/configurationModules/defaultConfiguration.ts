@@ -101,7 +101,7 @@ export class DefaultConfiguration extends Disposable implements IDefaultConfigur
             if (schema) {
                 // Make sure do not override the original value
                 const originalValue = tryOrDefault<string | undefined>(undefined, () => storage.get(key));
-                const newValue = mixin(originalValue, this.__getDefaultValueFromSchema(schema), true);
+                const newValue = mixin(originalValue, this.__getDefaultValueFromSchema(schema), { overwrite: true });
                 storage.set(key, newValue);
             } else {
                 storage.delete(key);

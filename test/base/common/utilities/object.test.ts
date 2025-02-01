@@ -14,7 +14,7 @@ suite('object-test', () => {
                 b: 'b',
                 c: undefined
             };
-            mixin(destination, source, false);
+            mixin(destination, source, { overwrite: false });
             assert.deepStrictEqual(destination, source);
     
             // overwrite
@@ -26,7 +26,7 @@ suite('object-test', () => {
                 b: 'b',
                 c: undefined
             };
-            mixin(destination, source, true);
+            mixin(destination, source, { overwrite: true });
             assert.deepStrictEqual(destination, source);
     
             // complicated overwrite
@@ -46,64 +46,78 @@ suite('object-test', () => {
                 b: 'b',
                 c: undefined
             };
-            mixin(destination, source, true);
-            assert.deepStrictEqual(destination, mixin(source, { d: undefined }));
+            mixin(destination, source, { overwrite: true });
+            assert.deepStrictEqual(destination, mixin(source, { d: undefined }, {}));
         });
 
         test('should copy properties from source to destination', () => {
             const dest = { a: 1 };
             const src = { b: 2 };
-            const result = mixin(dest, src);
+            const result = mixin(dest, src, {});
             assert.deepStrictEqual(result, { a: 1, b: 2 });
         });
 
         test('should overwrite existing properties if overwrite is true', () => {
             const dest = { a: 1 };
             const src = { a: 2 };
-            const result = mixin(dest, src, true);
+            const result = mixin(dest, src, { overwrite: true });
             assert.deepStrictEqual(result, { a: 2 });
         });
 
         test('should not overwrite existing properties if overwrite is false', () => {
             const dest = { a: 1 };
             const src = { a: 2 };
-            const result = mixin(dest, src, false);
+            const result = mixin(dest, src, { overwrite: false });
             assert.deepStrictEqual(result, { a: 1 });
         });
 
         test('should ignore non-object source', () => {
             const dest = { a: 1 };
             const src = 2;
-            const result = mixin(dest, src);
+            const result = mixin(dest, src, {});
             assert.deepStrictEqual(result, dest);
         });
 
         test('should ignore non-object destination and return source', () => {
             const dest = 1;
             const src = { a: 2 };
-            const result = mixin(dest, src);
+            const result = mixin(dest, src, {});
             assert.deepStrictEqual(result, src);
         });
 
         test('should handle nested objects and overwrite by default', () => {
             const dest = { a: { b: 1 } };
             const src = { a: { b: 2 } };
-            const result = mixin(dest, src);
+            const result = mixin(dest, src, {});
             assert.deepStrictEqual(result, { a: { b: 2 } });
         });
 
         test('should handle nested objects and not overwrite if specified', () => {
             const dest = { a: { b: 1 } };
             const src = { a: { b: 2 } };
-            const result = mixin(dest, src, false);
+            const result = mixin(dest, src, { overwrite: false });
             assert.deepStrictEqual(result, { a: { b: 1 } });
         });
 
         test('should prevent prototype pollution', () => {
             const dest = {};
             const src = JSON.parse('{"__proto__": {"polluted": "yes"}}');
-            mixin(dest, src);
+            mixin(dest, src, {});
             assert.strictEqual(({})['polluted'], undefined);
+        });
+
+        test('should ignore object overwrites with certain constructors', () => {
+            class TestObject {
+                constructor(public readonly value: number) {}
+            }
+            const oldObject = new TestObject(1);
+            const newObject = new TestObject(2);
+            const dest = { target: oldObject };
+            const src = { target: newObject };
+            mixin(dest, src, { ignored: [TestObject], overwrite: true });
+            assert.strictEqual(dest.target, newObject);
+            assert.strictEqual(oldObject.value, 1);
+            assert.strictEqual(newObject.value, 2);
         });
     });
     

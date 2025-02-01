@@ -1,4 +1,4 @@
-import { DeepReadonly, isNullable, isObject, isPrimitive } from "src/base/common/utilities/type";
+import { Constructor, DeepReadonly, isNullable, isObject, isPrimitive } from "src/base/common/utilities/type";
 
 /**
  * A generic type representing a reference to an data of type `T`.
@@ -14,6 +14,23 @@ export function ref<T>(data: T): Ref<T> {
 	return { ref: data };
 }
 
+export interface IMixinOptions {
+	
+	/**
+	 * Allows to control if existing properties on the destination should be 
+	 * overwritten or not.
+	 * @default true
+	 */
+	readonly overwrite?: boolean;
+
+	/**
+	 * The objects with these constructors will be treated as primitive types 
+	 * for overriding. It means either the destination/source value are 
+	 * `instanceof` one of these, it gets ignored to go deeper mixin.
+	 */
+	readonly ignored?: Constructor[];
+}
+
 /**
  * Copies all properties of source into destination. The optional parameter 
  * 'overwrite' allows to control if existing properties on the destination 
@@ -22,7 +39,7 @@ export function ref<T>(data: T): Ref<T> {
  * 
  * @note Non-object type will be ignored.
  */
-export function mixin<T>(destination: any, source: any, overwrite: boolean = true): T {
+export function mixin<T>(destination: any, source: any, options: IMixinOptions): T {
 	if (isObject(destination) === false) {
 		return source;
 	}
@@ -34,15 +51,18 @@ export function mixin<T>(destination: any, source: any, overwrite: boolean = tru
 	const propNames = Object.keys(source);
 	for (const propName of propNames) {
 		const exist = propName in destination;
+		const destValue = destination[propName];
+		const sourceValue = source[propName];
 
 		// We copy the value since the property does not exist in the destination
 		if (!exist) {
-			destination[propName] = source[propName];
+			destination[propName] = sourceValue;
 			continue;
 		}
 		
-		// not able to overwrite, we do nothing
-		if (!overwrite) {
+		// Not able to overwrite, we do nothing.
+		const overWrite = options.overwrite ?? true;
+		if (!overWrite) {
 			continue;
 		}
 
@@ -53,15 +73,19 @@ export function mixin<T>(destination: any, source: any, overwrite: boolean = tru
 
 		// recursive mixin when overwriting
 		if (Object.prototype.hasOwnProperty.call(destination, propName) 
-			&& isObject(destination[propName]) 
-			&& isObject(source[propName])
+			&& isObject(destValue) 
+			&& isObject(sourceValue)
 		) {
-			mixin(destination[propName], source[propName], overwrite);
-			continue;
+			const direct = options.ignored ?? [];
+			const ignore = direct.some(each => destValue instanceof each || sourceValue instanceof each);
+			if (!ignore) {
+				mixin(destValue, sourceValue, options);
+				continue;
+			}
 		}
 		
 		// primitive value, simply overwrite.
-		destination[propName] = source[propName];
+		destination[propName] = sourceValue;
 	}
     
 	return destination;

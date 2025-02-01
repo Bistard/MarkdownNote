@@ -169,7 +169,7 @@ export function toIPCTransferableError(error?: Error): Error | undefined {
     };
 
     // making sure any extra attributes from the `error` is also included.
-    mixin(newErr, error, false);
+    mixin(newErr, error, { overwrite: false });
 
     return <Error>newErr;
 }

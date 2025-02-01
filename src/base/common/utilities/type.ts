@@ -554,6 +554,16 @@ export function isFunction(obj: any): obj is Function {
 }
 
 /**
+ * This is a safe version for checking if the obj is {@link HTMLElement}.
+ */
+export function isHTMLElement(obj: any): obj is HTMLElement {
+    if (typeof HTMLElement === 'object') {
+        return obj instanceof HTMLElement;
+    }
+    return false;
+}
+
+/**
  * @description If the given value is an object in general speaking (does not
  * count as `array`, `null`, {@link RegExp} or {@link Date}).
  */

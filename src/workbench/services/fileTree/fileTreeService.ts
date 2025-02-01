@@ -402,8 +402,7 @@ export class FileTreeService extends Disposable implements IFileTreeService, IFi
 
             // init tree
             const dndProvider = this.instantiationService.createInstance(FileItemDragAndDropProvider, sorter);
-            const tree = new FileTree<FileItem, FuzzyScore>(
-                container,
+            const tree = this.instantiationService.createInstance(FileTree<FileItem, FuzzyScore> , container,
                 root,
                 {
                     itemProvider: new FileItemProvider(),

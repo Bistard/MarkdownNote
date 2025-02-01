@@ -20,5 +20,5 @@ export function createBatchResult<T, E = unknown>(batch: Partial<IBatchResult<T,
         failed: [],
         passed: [],
         failedError: [],
-    }, batch, true);
+    }, batch, { overwrite: true });
 }

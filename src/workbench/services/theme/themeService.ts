@@ -291,7 +291,7 @@ export class ThemeService extends Disposable implements IThemeService {
             ? assert(this._presetThemes.get(PresetColorTheme.LightModern))
             : assert(this._presetThemes.get(PresetColorTheme.DarkModern));
         
-        return mixin(baseColorMap, theme.getColorMap(), true);
+        return mixin(baseColorMap, theme.getColorMap(), { overwrite: true });
     }
 
     private __applyRulesToDocument(styleSheetContent: string, themeName: string): void {

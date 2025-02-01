@@ -217,72 +217,115 @@ export namespace DomUtility
  	 * 	https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle
 	 */
 	export namespace Attrs {
-		/**
-		 * A template function to get the desired CSS property from a given element.
-		 * @param element The HTMLElement.
-		 * @param property The CSS property name.
-		 * @returns The numerated desired property.
-		 * 
-		 * @warn If property cannot be convert to numerated form, -1 will be returned.
-		 */
-		const __getPropertyValue = function (element: HTMLElement, property: string): number {
-			const computedStyle: CSSStyleDeclaration = getComputedStyle(element);
-			const value = computedStyle.getPropertyValue(property);
-			return parseFloat(value) || 0;
-		};
+
+		export function getPropertyValue(element: HTMLElement, property: string, computed?: CSSStyleDeclaration): number;
+		export function getPropertyValue<T extends string[]>(element: HTMLElement, properties: [...T], computed?: CSSStyleDeclaration): { [K in keyof T]: number };
+		export function getPropertyValue(element: HTMLElement, properties: string | string[], computed?: CSSStyleDeclaration): number | number[] {
+			const computedStyle = computed ?? getComputedStyle(element);
+			const propsArray = Array.isArray(properties) ? properties : [properties];
+
+			const values = propsArray.map(prop => {
+				const raw = computedStyle.getPropertyValue(prop);
+				return parseFloat(raw) || 0;
+			});
+
+			return Array.isArray(properties) ? values : values[0]!;
+		}
 
 		// [method - padding]
 
-		export function getPaddingTop(element: HTMLElement): number {
-			return __getPropertyValue(element, 'padding-top');
+		export function getPaddings(element: HTMLElement, computed?: CSSStyleDeclaration): Record<Direction, number> {
+			const [top, right, bottom, left] = getPropertyValue(
+				element, 
+				[
+					'padding-top',
+					'padding-right',
+					'padding-bottom',
+					'padding-left'
+				],
+				computed
+			);
+			return { top, right, bottom, left };
 		}
 
-		export function getPaddingBottom(element: HTMLElement): number {
-			return __getPropertyValue(element, 'padding-bottom');
+		export function getPaddingTop(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getPaddings(element, computed).top;
 		}
 
-		export function getPaddingLeft(element: HTMLElement): number {
-			return __getPropertyValue(element, 'padding-left');
+		export function getPaddingBottom(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getPaddings(element, computed).bottom;
 		}
 
-		export function getPaddingRight(element: HTMLElement): number {
-			return __getPropertyValue(element, 'padding-right');
+		export function getPaddingLeft(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getPaddings(element, computed).left;
+		}
+
+		export function getPaddingRight(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getPaddings(element, computed).right;
 		}
 
 		// [method - border]
 
-		export function getBorderTop(element: HTMLElement): number {
-			return __getPropertyValue(element, 'border-top-width');
+		export function getBorders(element: HTMLElement, computed?: CSSStyleDeclaration): Record<Direction, number> {
+			const [top, right, bottom, left] = getPropertyValue(
+				element, 
+				[
+					'border-top-width',
+					'border-right-width',
+					'border-bottom-width',
+					'border-left-width'
+				],
+				computed
+			);
+			return { top, right, bottom, left };
 		}
 
-		export function getBorderBottom(element: HTMLElement): number {
-			return __getPropertyValue(element, 'border-bottom-width');
+		export function getBorderTop(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getBorders(element, computed).top;
 		}
 
-		export function getBorderLeft(element: HTMLElement): number {
-			return __getPropertyValue(element, 'border-left-width');
+		export function getBorderBottom(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getBorders(element, computed).bottom;
 		}
 
-		export function getBorderRight(element: HTMLElement): number {
-			return __getPropertyValue(element, 'border-right-width');
+		export function getBorderLeft(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getBorders(element, computed).left;
 		}
 
+		export function getBorderRight(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getBorders(element, computed).right;
+		}
+		
 		// [method - margin]
 
-		export function getMarginTop(element: HTMLElement): number {
-			return __getPropertyValue(element, 'margin-top');
+		export function getMargins(element: HTMLElement, computed?: CSSStyleDeclaration): Record<Direction, number> {
+			const [top, right, bottom, left] = getPropertyValue(
+				element, 
+				[
+					'margin-top',
+					'margin-right',
+					'margin-bottom',
+					'margin-left'
+				], 
+				computed
+			);
+			return { top, right, bottom, left };
 		}
 
-		export function getMarginBottom(element: HTMLElement): number {
-			return __getPropertyValue(element, 'margin-bottom');
+		export function getMarginTop(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getMargins(element, computed).top;
 		}
 
-		export function getMarginLeft(element: HTMLElement): number {
-			return __getPropertyValue(element, 'margin-left');
+		export function getMarginBottom(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getMargins(element, computed).bottom;
 		}
 
-		export function getMarginRight(element: HTMLElement): number {
-			return __getPropertyValue(element, 'margin-right');
+		export function getMarginLeft(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getMargins(element, computed).left;
+		}
+
+		export function getMarginRight(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			return getMargins(element, computed).right;
 		}
 
 		// [method - content]
@@ -292,19 +335,19 @@ export namespace DomUtility
 		 * and margins).
 		 * @param element The HTMLElement.
 		 */
-		export function getTotalWidth(element: HTMLElement): number {
-			const margin = getMarginLeft(element) + getMarginRight(element);
-			return element.offsetWidth + margin;
+		export function getTotalWidth(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			const margins = getMargins(element, computed);
+			return element.offsetWidth + margins.left + margins.right;
 		}
-		
+
 		/**
 		 * @description Get element total height (including, padding, borders 
 		 * and margins).
 		 * @param element The HTMLElement.
 		 */
-		export function getTotalHeight(element: HTMLElement): number {
-			const margin = getMarginTop(element) + getMarginBottom(element);
-			return element.offsetHeight + margin;
+		export function getTotalHeight(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			const margins = getMargins(element, computed);
+			return element.offsetHeight + margins.top + margins.bottom;
 		}
 
 		/**
@@ -312,10 +355,11 @@ export namespace DomUtility
 		 * @param element The HTMLElement.
 		 * @note If the element is NOT in the DOM tree, the behavior is undefined.
 		 */
-		export function getContentHeight(element: HTMLElement): number {
-			const padding = getPaddingTop(element) + getPaddingBottom(element);
-			const border  = getBorderTop(element) + getBorderBottom(element);
-			return element.offsetHeight - padding - border;
+		export function getContentHeight(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			computed ??= getComputedStyle(element);
+			const paddings = getPaddings(element, computed);
+			const borders = getBorders(element, computed);
+			return element.offsetHeight - (paddings.top + paddings.bottom) - (borders.top + borders.bottom);
 		}
 
 		/**
@@ -323,10 +367,11 @@ export namespace DomUtility
 		 * @param element The HTMLElement.
 		 * @note If the element is NOT in the DOM tree, the behavior is undefined.
 		 */
-		export function getContentWidth(element: HTMLElement): number {
-			const padding = getPaddingLeft(element) + getPaddingRight(element);
-			const border  = getBorderLeft(element) + getBorderRight(element);
-			return element.offsetWidth - padding - border;
+		export function getContentWidth(element: HTMLElement, computed?: CSSStyleDeclaration): number {
+			computed ??= getComputedStyle(element);
+			const paddings = getPaddings(element, computed);
+			const borders = getBorders(element, computed);
+			return element.offsetWidth - (paddings.left + paddings.right) - (borders.left + borders.right);
 		}
 
 		/**
@@ -355,7 +400,7 @@ export namespace DomUtility
 	}
 
 	export namespace Positions {
-		
+
 		/**
 		 * @description Calculates the position and dimensions of an DOM element 
 		 * relative to the entire web page, taking into account any scrolling 

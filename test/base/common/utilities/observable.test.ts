@@ -195,8 +195,8 @@ suite('observable-test', () => {
 
         const base = { className: 'People', property: 'name' };
         
-        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { action: 'set', from: 'Chris', to: 'Alex' }));
-        assert.deepStrictEqual(history[1], mixin(deepCopy(base), { action: 'get', value: 'Alex' }));
+        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { action: 'set', from: 'Chris', to: 'Alex' }, {}));
+        assert.deepStrictEqual(history[1], mixin(deepCopy(base), { action: 'get', value: 'Alex' }, {}));
     });
     
     test('Duplicate observing doesn"t work', () => {
@@ -212,7 +212,7 @@ suite('observable-test', () => {
         assert.strictEqual(history.length, 1);
 
         const base = { className: 'People', property: 'name' };
-        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { action: 'set', from: 'Chris', to: 'Alex' }));
+        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { action: 'set', from: 'Chris', to: 'Alex' }, {}));
     });
 
     test('Non-decorated properties should not trigger observations', () => {
@@ -246,8 +246,8 @@ suite('observable-test', () => {
         assert.strictEqual(history.length, 2);
         const base = { className: 'People', action: 'call' };
 
-        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { property: 'hello', args: [], ret: 'world' }));
-        assert.deepStrictEqual(history[1], mixin(deepCopy(base), { property: 'echo', args: ['again'], ret: 'again' }));
+        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { property: 'hello', args: [], ret: 'world' }, {}));
+        assert.deepStrictEqual(history[1], mixin(deepCopy(base), { property: 'echo', args: ['again'], ret: 'again' }, {}));
     });
 
     test('Non-decorated methods should not be observed', () => {
@@ -283,11 +283,11 @@ suite('observable-test', () => {
         const base = { className: 'People', action: 'get' };
         
         // person.ages
-        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { property: 'ages', value: innerAge }));
+        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { property: 'ages', value: innerAge }, {}));
         
         // person.ages.age
-        assert.deepStrictEqual(history[1], mixin(deepCopy(base), { property: 'ages', value: innerAge }));
-        assert.deepStrictEqual(history[2], mixin(deepCopy(base), { property: 'ages.age', value: 18 }));
+        assert.deepStrictEqual(history[1], mixin(deepCopy(base), { property: 'ages', value: innerAge }, {}));
+        assert.deepStrictEqual(history[2], mixin(deepCopy(base), { property: 'ages.age', value: 18 }, {}));
     });
     
     test('Observing "set" on direct property that is an object', () => {
@@ -307,7 +307,7 @@ suite('observable-test', () => {
         assert.strictEqual(history.length, 1);
         const base = { className: 'People', action: 'set' };
         
-        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { property: 'ages.age', from: 18, to: 19 }));
+        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { property: 'ages.age', from: 18, to: 19 }, {}));
     });
     
     test('Observing "set" and "get" on direct property that is an object', () => {
@@ -327,8 +327,8 @@ suite('observable-test', () => {
         assert.strictEqual(history.length, 2);
         const base = { className: 'People', };
         
-        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { action: 'get', property: 'ages', value: innerAge }));
-        assert.deepStrictEqual(history[1], mixin(deepCopy(base), { action: 'set', property: 'ages.age', from: 18, to: 19 }));
+        assert.deepStrictEqual(history[0], mixin(deepCopy(base), { action: 'get', property: 'ages', value: innerAge }, {}));
+        assert.deepStrictEqual(history[1], mixin(deepCopy(base), { action: 'set', property: 'ages.age', from: 18, to: 19 }, {}));
     });
     
     test('"get" for direct object property with method, altering reference', () => {

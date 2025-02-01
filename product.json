@@ -8,6 +8,6 @@
     "projectName": "nota",
     "applicationName": "nota",
     "description": "A cross-platform markdown note-taking app.",
-    "version": "0.6.8",
+    "version": "0.6.9",
     "license": "MIT"
 }

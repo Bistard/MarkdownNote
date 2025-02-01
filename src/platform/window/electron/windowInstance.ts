@@ -188,7 +188,7 @@ export class WindowInstance extends Disposable implements IWindowInstance {
         this.logService.debug('WindowInstance', `(Window ID: ${this._id}) Loading window...`);
         this.logService.debug('MainWindowService', 'Primary monitor information:', { information: this.screenMonitorService.getPrimaryMonitorInfo() });
 
-        const resolvedConfiguration = mixin<IWindowCreationOptions>(this.configuration, optionalConfiguration, true);
+        const resolvedConfiguration = mixin<IWindowCreationOptions>(this.configuration, optionalConfiguration, { overwrite: true });
         this._configuration = resolvedConfiguration;
 
         this._configurationIpcAccessible.updateData(this.configuration);
