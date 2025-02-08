@@ -24,16 +24,16 @@ export class EditorModel extends Disposable implements IEditorModel {
 
     // [events]
 
-    private readonly _onDidBuild = this.__register(new Emitter<ProseEditorState>({ onFire: () => this.__setDirty(false) }));
+    private readonly _onDidBuild = this.__register(new Emitter<ProseEditorState>({ onFire: () => this.setDirty(false) }));
     public readonly onDidBuild = this._onDidBuild.registerListener;
 
-    private readonly _onTransaction = this.__register(new Emitter<ProseTransaction>({ onFire: () => this.__setDirty(true) }));
+    private readonly _onTransaction = this.__register(new Emitter<ProseTransaction>({ onFire: () => this.setDirty(true) }));
     public readonly onTransaction = this._onTransaction.registerListener;
 
-    private readonly _onDidStateChange = this.__register(new Emitter<void>({ onFire: () => this.__setDirty(true) }));
+    private readonly _onDidStateChange = this.__register(new Emitter<void>({ onFire: () => this.setDirty(true) }));
     public readonly onDidStateChange = this._onDidStateChange.registerListener;
 
-    private readonly _onDidSave = this.__register(new Emitter<void>({ onFire: () => this.__setDirty(false) }));
+    private readonly _onDidSave = this.__register(new Emitter<void>({ onFire: () => this.setDirty(false) }));
     public readonly onDidSave = this._onDidSave.registerListener;
 
     private readonly _onDidSaveError = this.__register(new Emitter<unknown>());
@@ -44,15 +44,16 @@ export class EditorModel extends Disposable implements IEditorModel {
 
     // [fields]
 
-    private readonly _options: EditorOptionsType;        // The configuration of the editor
-    private readonly _source: URI;                       // The source file the model is about to read and parse.
-    private readonly _schema: EditorSchema;              // An object that defines how a view is organized.
-    private readonly _lexer: IMarkdownLexer;             // Responsible for parsing the raw text into tokens.
-    private readonly _docParser: IDocumentParser;        // Parser that parses the given token into a legal view based on the schema.
-    private readonly _docSerializer: MarkdownSerializer; // Serializer that transforms the prosemirror document back to raw string.
+    private readonly _options: EditorOptionsType;         // The configuration of the editor
+    private readonly _source: URI;                        // The source file the model is about to read and parse.
+    private readonly _schema: EditorSchema;               // An object that defines how a view is organized.
+    private readonly _lexer: IMarkdownLexer;              // Responsible for parsing the raw text into tokens.
+    private readonly _nodeProvider: DocumentNodeProvider; // Stores all the legal document node.
+    private readonly _docParser: IDocumentParser;         // Parser that parses the given token into a legal view based on the schema.
+    private readonly _docSerializer: MarkdownSerializer;  // Serializer that transforms the prosemirror document back to raw string.
 
     private _editorState?: ProseEditorState; // A reference to the prosemirror state.
-    private _dirty: boolean;                 // Indicates if the file has unsaved changes. Modify this through `this.__setDirty()`
+    private _dirty: boolean;                 // Indicates if the file has unsaved changes. Modify this through `this.setDirty()`
 
     // [constructor]
 
@@ -66,15 +67,15 @@ export class EditorModel extends Disposable implements IEditorModel {
         super();
         this._source = source;
         this._options = options;
+        this._dirty = false;
+        
         this._lexer = new MarkdownLexer(this.__initLexerOptions(options));
 
-        const nodeProvider = DocumentNodeProvider.create(instantiationService).register();
-        this._schema = buildSchema(nodeProvider);
-        this._docParser = this.__register(new DocumentParser(this._schema, nodeProvider, /* options */));
+        this._nodeProvider = DocumentNodeProvider.create(instantiationService).register();
+        this._schema = buildSchema(this._nodeProvider);
+        this._docParser = this.__register(new DocumentParser(this._schema, this._nodeProvider, /* options */));
         this.__register(this._docParser.onLog(event => defaultLog(logService, event.level, 'EditorView', event.message, event.error, event.additional)));
-        this._docSerializer = new MarkdownSerializer(nodeProvider, { strict: true, escapeExtraCharacters: undefined, });
-
-        this._dirty = false;
+        this._docSerializer = new MarkdownSerializer(this._nodeProvider, { strict: true, escapeExtraCharacters: undefined, });
 
         logService.debug('EditorModel', 'Constructed');
     }
@@ -158,6 +159,14 @@ export class EditorModel extends Disposable implements IEditorModel {
         return -1; // TODO
     }
 
+    public setDirty(value: boolean): void {
+        if (this._dirty === value) {
+            return;
+        }
+        this._dirty = value;
+        this._onDidDirtyChange.fire(value);
+    }
+
     public save(): AsyncResult<void, Error> {
         if (this._dirty === false) {
             return AsyncResult.ok();
@@ -178,15 +187,11 @@ export class EditorModel extends Disposable implements IEditorModel {
             });
     }
 
-    // [private methods]
-
-    private __setDirty(value: boolean): void {
-        if (this._dirty === value) {
-            return;
-        }
-        this._dirty = value;
-        this._onDidDirtyChange.fire(value);
+    public getRegisteredDocumentNodes(): string[] {
+        return this._nodeProvider.getRegisteredNodes().map(each => each.name);
     }
+
+    // [private methods]
 
     public __onDidStateChange(event: IOnDidContentChangeEvent): void {
         const newState = event.view.state;

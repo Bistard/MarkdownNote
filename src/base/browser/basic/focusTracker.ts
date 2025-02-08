@@ -7,12 +7,12 @@ interface IFocusTracker extends IDisposable {
 	/** 
 	 * Fires when the element is focused. 
 	 */
-	onDidFocus: Register<void>;
+	onDidFocus: Register<FocusEvent>;
 
 	/** 
 	 * Fires when the element is blurred. 
 	 */
-	onDidBlur: Register<void>;
+	onDidBlur: Register<FocusEvent>;
 
 	/** 
 	 * Fires when the component is either focused or blurred (true represents 
@@ -56,11 +56,11 @@ export class FocusTracker extends Disposable implements IFocusTracker {
 	
 	// [event]
 
-	private readonly _onDidFocus = this.__register(new Emitter<void>());
-	public readonly onDidFocus: Register<void> = this._onDidFocus.registerListener;
+	private readonly _onDidFocus = this.__register(new Emitter<FocusEvent>());
+	public readonly onDidFocus = this._onDidFocus.registerListener;
 
-	private readonly _onDidBlur = this.__register(new Emitter<void>());
-	public readonly onDidBlur: Register<void> = this._onDidBlur.registerListener;
+	private readonly _onDidBlur = this.__register(new Emitter<FocusEvent>());
+	public readonly onDidBlur = this._onDidBlur.registerListener;
 
 	public readonly onDidFocusChange = Event.any([Event.map(this.onDidFocus, () => true), Event.map(this.onDidBlur, () => false)]);
 
@@ -76,22 +76,22 @@ export class FocusTracker extends Disposable implements IFocusTracker {
 
 	// [private helper methods]
 
-	private __onFocus(): void {
+	private __onFocus(e: FocusEvent): void {
 		this._loosingFocused = false;
 		if (this._focused === false) {
 			this._focused = true;
-			this._onDidFocus.fire();
+			this._onDidFocus.fire(e);
 		}
 	}
 
-	private __onBlur(): void {
+	private __onBlur(e: FocusEvent): void {
 		if (this._focused) {
 			this._loosingFocused = true;
 			window.setTimeout(() => {
 				if (this._loosingFocused) {
 					this._loosingFocused = false;
 					this._focused = false;
-					this._onDidBlur.fire();
+					this._onDidBlur.fire(e);
 				}
 			}, 0);
 		}

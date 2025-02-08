@@ -11,6 +11,8 @@ import { noop } from "src/base/common/performance";
 import { IS_MAC } from "src/base/common/platform";
 import { UnbufferedScheduler } from "src/base/common/utilities/async";
 
+// region - interface
+
 export type MenuAction = SimpleMenuAction | MenuSeparatorAction | SubmenuAction | CheckMenuAction;
 
 export const enum MenuItemType {
@@ -86,6 +88,8 @@ export interface ISubmenuActionOptions extends Omit<IActionOptions, 'callback'> 
     readonly extraClassName?: string;
 }
 
+// region - __BaseMenuAction
+
 class __BaseMenuAction<TType extends MenuItemType> extends Action implements IMenuAction {
 
     // [fields]
@@ -108,6 +112,8 @@ class __BaseMenuAction<TType extends MenuItemType> extends Action implements IMe
         this.extraClassName = opts.extraClassName;
     }
 }
+
+// region - List of MenuAction
 
 export class SimpleMenuAction extends __BaseMenuAction<MenuItemType.General> {
 
@@ -176,6 +182,8 @@ export class SubmenuAction extends __BaseMenuAction<MenuItemType.Submenu> {
         this._onRun = fn;
     }
 }
+
+// region - AbstractMenuItem
 
 /**
  * Interface for {@link AbstractMenuItem} and its inheritance.
@@ -419,6 +427,8 @@ export abstract class AbstractMenuItem extends ActionListItem implements IMenuIt
 		}
     }
 }
+
+// region - List of MenuItem
 
 /**
  * @class The {@link MenuSeparatorItem} overrides the pre-defined event 

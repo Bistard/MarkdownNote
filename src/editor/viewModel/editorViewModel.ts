@@ -5,7 +5,6 @@ import { ProseEditorState, ProseTransaction } from "src/editor/common/proseMirro
 import { IEditorViewModel } from "src/editor/common/viewModel";
 import { IOnDidContentChangeEvent } from "src/editor/view/proseEventBroadcaster";
 
-
 export class EditorViewModel extends Disposable implements IEditorViewModel {
 
     // [events]
@@ -33,10 +32,8 @@ export class EditorViewModel extends Disposable implements IEditorViewModel {
 
     // [public methods]
 
-    public onDidChangeViewState(e: IOnDidContentChangeEvent): void {
-
-        console.log(e.transaction);
-
+    public onDidViewContentChange(e: IOnDidContentChangeEvent): void {
+        this._model.setDirty(true);
         this._model.__onDidStateChange(e);
     }
 

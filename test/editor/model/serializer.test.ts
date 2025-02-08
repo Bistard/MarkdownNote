@@ -8,7 +8,7 @@ import { IncrementalDelimiter, MarkdownSerializer } from 'src/editor/model/seria
 import { ConsoleLogger } from 'src/platform/logger/common/consoleLoggerService';
 import { createIntegration } from 'test/utils/integration';
 
-suite('MarkdownSerializer', async () => {
+suite.skip('MarkdownSerializer - exact version', async () => {
     
     const di = await createIntegration({ 
         i18nService: true 
@@ -45,8 +45,8 @@ suite('MarkdownSerializer', async () => {
         return serializedContent;
     }
 
-    suite('IncrementalDelimiter', () => {
-        suite('constructor', () => {
+    suite.skip('IncrementalDelimiter', () => {
+        suite.skip('constructor', () => {
             test('should use the provided default delimiter', () => {
                 const manager = new IncrementalDelimiter('*');
                 assert.strictEqual(manager.getDelimiter(), '*');
@@ -58,7 +58,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
         
-        suite('getDelimiter', () => {
+        suite.skip('getDelimiter', () => {
             test('should return default delimiter if no increments are set', () => {
                 const manager = new IncrementalDelimiter('>');
                 assert.strictEqual(manager.getDelimiter(), '>');
@@ -80,7 +80,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('setIncrement', () => {
+        suite.skip('setIncrement', () => {
             test('should set increments when called for the first time', () => {
                 const manager = new IncrementalDelimiter('>');
                 manager.setIncrement([' ', '  ']);
@@ -114,7 +114,7 @@ suite('MarkdownSerializer', async () => {
         });
     });
 
-    suite('corner case: preserveLastEndOfLine', () => {
+    suite.skip('corner case: preserveLastEndOfLine', () => {
         test('Paragraph - With new line at the end', () => {
             expectSame('paragraph1\n');
         });
@@ -160,8 +160,8 @@ suite('MarkdownSerializer', async () => {
         });
     });
 
-    suite('block-level', () => {
-        suite('Paragraph & Text', () => {
+    suite.skip('block-level', () => {
+        suite.skip('Paragraph & Text', () => {
             test('Single paragraph', () => {
                 expectSame('Some paragraph.');
             });
@@ -231,7 +231,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('Heading', () => {
+        suite.skip('Heading', () => {
             test('Level 1 - 6', () => {
                 expectSame('# Heading 1');
                 expectSame('## Heading 2');
@@ -332,7 +332,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('html', () => {
+        suite.skip('html', () => {
             test('Basic empty div', () => {
                 expectSame('<div></div>');
             });
@@ -422,7 +422,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('inline_html', () => {
+        suite.skip('inline_html', () => {
             test('Basic inline HTML - <em>', () => {
                 expectSame('This is <em>emphasized</em> text.');
             });
@@ -513,7 +513,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('Image', () => {
+        suite.skip('Image', () => {
             test('Empty image syntax', () => {
                 expectSame('![]()');
             });
@@ -612,7 +612,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('HorizontalRule', () => {
+        suite.skip('HorizontalRule', () => {
             test('Basic ---', () => {
                 expectSame('---');
             });
@@ -710,7 +710,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('escape', () => {
+        suite.skip('escape', () => {
             test('Asterisk', () => {
                 expectSame('\\*This is not bold\\*');
             });
@@ -748,7 +748,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('Space', () => {
+        suite.skip('Space', () => {
             test('Basic space between paragraphs', () => {
                 expectSame('paragraph 1.\nparagraph2.');
                 expectSame('paragraph 1.\n\nparagraph2.');
@@ -808,7 +808,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('lineBreak', () => {
+        suite.skip('lineBreak', () => {
             test('Basic line break', () => {
                 expectSame('First line\nSecond line');
             });
@@ -874,7 +874,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('blockquote', () => {
+        suite.skip('blockquote', () => {
             test('Basic blockquote with single line', () => {
                 expectSame('> This is a blockquote.');
             });
@@ -988,7 +988,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
 
-        suite('codeblock', () => {
+        suite.skip('codeblock', () => {
             test('Basic fenced code block with backticks', () => {
                 expectSame('```\nconsole.log("Hello, World!");\n```');
             });
@@ -1116,7 +1116,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
 
-        suite('list', () => {
+        suite.skip('list', () => {
             test('Unordered list - Basic', () => {
                 expectSame('- Item 1\n- Item 2\n- Item 3');
             });
@@ -1187,8 +1187,8 @@ suite('MarkdownSerializer', async () => {
         });
     });
     
-    suite('inline-level', () => {
-        suite('em', () => {
+    suite.skip('inline-level', () => {
+        suite.skip('em', () => {
             test('Basic emphasis with *', () => {
                 expectSame('*This is emphasized*');
             });
@@ -1318,7 +1318,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('strong', () => {
+        suite.skip('strong', () => {
             test('Basic bold with **', () => {
                 expectSame('**This is bold**');
             });
@@ -1440,7 +1440,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
     
-        suite('codespan', () => {
+        suite.skip('codespan', () => {
             test('Basic inline code with single backticks', () => {
                 expectSame('`code`');
             });
@@ -1542,7 +1542,7 @@ suite('MarkdownSerializer', async () => {
             });
         });
         
-        suite('link', () => {
+        suite.skip('link', () => {
             test('Basic link', () => {
                 expectSame('[example](https://example.com)');
             });

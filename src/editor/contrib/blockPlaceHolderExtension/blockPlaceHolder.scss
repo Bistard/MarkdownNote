@@ -1,0 +1,19 @@
+.editor-container.rich-text > .ProseMirror {
+
+    & .empty-block {
+        position: relative;
+
+        &::before {
+            content: attr(placeholder-text); // variable from the javascript
+
+            position: absolute;
+            display: block;
+            color: #999;
+            pointer-events: none;
+            user-select: none;
+            
+            margin-left: 2px; // make sure no overlap with the cursor
+            opacity: 0.7;
+        }
+    }
+}

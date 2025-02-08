@@ -404,8 +404,42 @@ class Git {
     }
 }
 
+class SmartRegExp {
+
+    // [fields]
+
+    _source;
+    _flag;
+
+    // [constructor]
+
+    constructor(raw, flag) {
+        if (typeof raw === 'string') {
+            this._source = raw;
+            this._flag = flag;
+        } else {
+            this._source = raw.source;
+            this._flag = flag ?? raw.flags;
+        }
+    }
+
+    // [public methods]
+
+    replace(name, value) {
+        let valSource = typeof value === 'string' ? value : value.source;
+        valSource = valSource.replace(/(^|[^[])\^/g, '$1');
+        this._source = this._source.replaceAll(name, valSource);
+        return this;
+    }
+
+    get() {
+        return new RegExp(this._source, this._flag);
+    }
+}
+
 // export
 module.exports = { 
     log, fgColor, bgColor, 
-    Colors, Times, ScriptProcess, ScriptHelper, Git 
+    Colors, Times, ScriptProcess, ScriptHelper, Git,
+    SmartRegExp,
 };

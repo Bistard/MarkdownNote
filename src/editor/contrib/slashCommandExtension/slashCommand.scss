@@ -1,0 +1,19 @@
+.editor-slash-command.context-menu {
+    max-height: 260px;
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    // track
+    &::-webkit-scrollbar-track {
+        background: white;
+        border-radius: 10px;
+    }
+
+    // Handle
+    &::-webkit-scrollbar-thumb {
+        background: #dfdfdf;
+    }
+}

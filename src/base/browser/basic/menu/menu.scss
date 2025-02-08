@@ -8,11 +8,8 @@ $menu-item-height: var(--menu-item-height);
     
     display: flex;
     flex-direction: column;
-    
     align-items: center;
     
-    border: 1px solid var(--nota-menu-border);
-    border-radius: 4px;
     background: var(--nota-menu-background);
 
     &:focus {

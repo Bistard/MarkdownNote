@@ -3,8 +3,8 @@ import type { IEditorWidget } from "src/editor/editorWidget";
 import { ReplaceAroundStep, canJoin, canSplit, liftTarget, replaceStep } from "prosemirror-transform";
 import { ILogService } from "src/base/common/logger";
 import { MarkEnum, TokenEnum } from "src/editor/common/markdown";
-import { ProseEditorState, ProseTransaction, ProseAllSelection, ProseTextSelection, ProseNodeSelection, ProseEditorView, ProseReplaceStep, ProseSlice, ProseFragment, ProseNode, ProseSelection, ProseContentMatch, ProseMarkType, ProseAttrs, ProseSelectionRange, ProseNodeType, ProseResolvedPos } from "src/editor/common/proseMirror";
-import { ProseUtils } from "src/editor/common/proseUtility";
+import { ProseEditorState, ProseTransaction, ProseAllSelection, ProseTextSelection, ProseNodeSelection, ProseEditorView, ProseReplaceStep, ProseSlice, ProseFragment, ProseNode, ProseSelection, ProseContentMatch, ProseMarkType, ProseAttrs, ProseSelectionRange, ProseNodeType, ProseResolvedPos, ProseCursor } from "src/editor/common/proseMirror";
+import { ProseTools } from "src/editor/common/proseUtility";
 import { EditorSchema } from "src/editor/model/schema";
 import { Command, ICommandSchema, buildChainCommand } from "src/platform/command/common/command";
 import { ICommandService } from "src/platform/command/common/commandService";
@@ -172,18 +172,6 @@ function __registerOtherCommands(extension: IEditorCommandExtension): void {
         [getPlatformShortcut('Ctrl+A', 'Meta+A')]
     );
     
-    extension.registerCommand(__buildEditorCommand(
-            {
-                id: 'editor-select-parent',
-                when: whenEditorReadonly,
-            },
-            [
-                EditorCommands.SelectParent
-            ]
-        ), 
-        [getPlatformShortcut('Ctrl+Shift+A', 'Meta+Shift+A')]
-    );
-
     // @fix Doesn't work with CM, guess bcz CM is focused but PM is not.
     extension.registerCommand(__buildEditorCommand(
             {
@@ -283,10 +271,52 @@ export namespace EditorCommands {
     export class SelectAll extends EditorCommandBase {
 
         public run(provider: IServiceProvider, editor: IEditorWidget, state: ProseEditorState, dispatch?: (tr: ProseTransaction) => void): boolean {
+            if (!dispatch) {
+                return false;
+            }
+            const { selection } = state;
+
+            // case 0: If already fully selected, do nothing.
+            if (ProseTools.Selection.isFullSelection(state)) {
+                return true;
+            }
+
+            // case 1: empty selection, only select that parent block first.
+            if (ProseTools.Cursor.isCursor(selection)) {
+                this.__selectParent(state, selection, dispatch);
+                return true;
+            }
+
+            // case 2: partial selection, within the same parent, select that block.
+            const { $from, $to } = state.selection;
+            const inSameBlock = $from.sameParent($to);
+            if (inSameBlock) {
+                this.__selectParent(state, selection, dispatch);
+                return true;
+            }
+
+            // case 3: complex selection, select everything as normal.
             const allSelect = new ProseAllSelection(state.doc);
             const tr = state.tr.setSelection(allSelect);
-            dispatch?.(tr);
+            dispatch(tr);
             return true;
+        }
+
+        private __selectParent(state: ProseEditorState, selection: ProseSelection, dispatch: (tr: ProseTransaction) => void): void {
+            const currBlockPos = selection.$from.start() - 1;
+            const shouldAllSelect = currBlockPos < 0;
+            
+            const newSelection = shouldAllSelect
+                ? new ProseAllSelection(state.doc)
+                : ProseNodeSelection.create(state.doc, currBlockPos);
+            const tr = state.tr.setSelection(newSelection);
+            
+            // only scroll when partial selection
+            if (shouldAllSelect === false) {
+                tr.scrollIntoView();
+            }
+            
+            dispatch(tr);
         }
     }
 
@@ -331,7 +361,7 @@ export namespace EditorCommands {
             }
 
             // Determine the default block type at the current position.
-            const defaultBlockType = ProseUtils.getNextValidDefaultNodeTypeAt($to.parent, $to.indexAfter());
+            const defaultBlockType = ProseTools.Node.getNextValidDefaultNodeTypeAt($to.parent, $to.indexAfter());
 
             // Check if the determined block type is valid and is a textblock.
             if (!defaultBlockType || !defaultBlockType.isTextblock) {
@@ -438,7 +468,7 @@ export namespace EditorCommands {
                  * after the selection (from).
                  */
                 const match = $from.node(-1).contentMatchAt($from.indexAfter(-1));
-                const defaultType = $from.depth === 0 ? null : ProseUtils.getNextValidDefaultNodeType(match);
+                const defaultType = $from.depth === 0 ? null : ProseTools.Node.getNextValidDefaultNodeType(match);
                 let types = isAtEnd && defaultType ? [{ type: defaultType }] : undefined;
                 let ifCanSplitAtPosition = canSplit(tr.doc, tr.mapping.map($from.pos), 1, types);
 
@@ -818,7 +848,7 @@ export namespace EditorCommands {
                      * If the cursor is positioned within a word, this allows 
                      * the entire word to be toggled with the specified mark.
                      */
-                    const wordBound = ProseUtils.getWordBound(state.selection.$from);
+                    const wordBound = ProseTools.Text.getWordBound(state.selection.$from);
                     if (wordBound) {
                         const { from, to } = wordBound;
                         const tr = state.tr;
@@ -974,34 +1004,6 @@ export namespace EditorCommands {
         }
     }
     
-    export class SelectParent extends EditorCommandBase {
-
-        public run(provider: IServiceProvider, editor: IEditorWidget, state: ProseEditorState, dispatch?: (tr: ProseTransaction) => void): boolean {
-            const from = state.selection.$from;
-            const ancestorDepth = from.getCommonAncestorDepth(state.selection.to);
-
-            /**
-             * No shared ancestor of the endpoints of the selections. 0 is 
-             * returned to represent the root is the only ancestor. We select
-             * the entire document.
-             */
-            if (ancestorDepth === 0) {
-                const commandService = provider.getOrCreateService(ICommandService);
-                return commandService.executeCommand('editor-select-all', editor, state, dispatch);
-            }
-            
-            if (dispatch) {
-                // This is the position where the selection of the parent node will start.
-                const pos = from.before(ancestorDepth);
-                const newSelection = ProseNodeSelection.create(state.doc, pos);
-                const tr = state.tr.setSelection(newSelection);
-                dispatch(tr.scrollIntoView());
-            }
-
-            return true;
-        }
-    }
-
     export class FileSave extends EditorCommandBase {
 
         public run(provider: IServiceProvider, editor: IEditorWidget): boolean {

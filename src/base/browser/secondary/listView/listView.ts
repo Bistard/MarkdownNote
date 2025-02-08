@@ -116,10 +116,10 @@ export interface IListView<T> extends IList<T>, IDisposable {
     get onDidScroll(): Register<IScrollEvent>;
     
     /** Fires when the {@link IListView} itself is focused. */
-    get onDidFocus(): Register<void>;
+    get onDidFocus(): Register<FocusEvent>;
 
     /** Fires when the {@link IListView} itself is blurred. */
-    get onDidBlur(): Register<void>;
+    get onDidBlur(): Register<FocusEvent>;
 
     /** Fires when the item in the {@link IListView} is clicked. */
     get onClick(): Register<MouseEvent>;
@@ -340,8 +340,8 @@ export class ListView<T> extends Disposable implements ISpliceable<T>, IListView
     get onWillScroll(): Register<IScrollEvent> { return this._scrollableWidget.onWillScroll; }
     get onDidScroll(): Register<IScrollEvent> { return this._scrollableWidget.onDidScroll; }
     
-    get onDidFocus(): Register<void> { return this._focusTracker.onDidFocus; }
-    get onDidBlur(): Register<void> { return this._focusTracker.onDidBlur; }
+    get onDidFocus(): Register<FocusEvent> { return this._focusTracker.onDidFocus; }
+    get onDidBlur(): Register<FocusEvent> { return this._focusTracker.onDidBlur; }
     
     @memoize get onClick(): Register<MouseEvent> { return this.__register(new DomEmitter(this._element, EventType.click)).registerListener; }
     @memoize get onDoubleClick(): Register<MouseEvent> { return this.__register(new DomEmitter(this._element, EventType.doubleClick)).registerListener; }

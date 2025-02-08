@@ -5,6 +5,8 @@ import { Arrays } from "src/base/common/utilities/array";
 import { panic } from "src/base/common/utilities/panic";
 import { Callable, isNullable, isNumber, isString, Mutable } from "src/base/common/utilities/type";
 
+// region - interface
+
 export interface IAction extends IDisposable {
     /** 
      * The ID of the action.
@@ -40,6 +42,8 @@ export interface IActionOptions {
      */
     readonly callback: Callable<any[], any>;
 }
+
+// region - Action
 
 /**
  * @class An {@link Action} is more lightweight, flexible than a {@link Command}.
@@ -80,6 +84,8 @@ export interface IActionRunEvent {
     readonly action: IAction;
     readonly error?: Error;
 }
+
+// region - ActionList
 
 /**
  * An interface only for {@link ActionList}.
@@ -368,6 +374,8 @@ export abstract class ActionList<TAction extends IAction, TItem extends IActionL
         (<Mutable<TItem[]>>this._items) = [];
     }
 }
+
+// region - ActionRunner
 
 /**
  * @class A very simple wrapper class that wraps {@link IActionRunEvent}s. This

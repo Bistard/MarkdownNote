@@ -7,7 +7,7 @@ import { Strings } from "src/base/common/utilities/string";
 import { isString } from "src/base/common/utilities/type";
 import { TokenEnum } from "src/editor/common/markdown";
 import { ProseMark, ProseNode } from "src/editor/common/proseMirror";
-import { ProseUtils } from "src/editor/common/proseUtility";
+import { ProseTools } from "src/editor/common/proseUtility";
 import { DocumentNodeProvider } from "src/editor/model/documentNode/documentNodeProvider";
 
 export type Serializer<TNode extends ProseNode | ProseMark, TReturn extends void | string> = (state: IMarkdownSerializerState, node: TNode, parent: ProseNode, index: number) => TReturn;
@@ -208,7 +208,7 @@ class MarkdownSerializerState implements IMarkdownSerializerState {
      * @description Render the contents of a given node as block nodes.
      */
     public serializeBlock(parent: ProseNode): void {
-        for (const { node: child, index } of ProseUtils.iterateChild(parent)) {
+        for (const { node: child, index } of ProseTools.Node.iterateChild(parent)) {
             this.__serializeBlock(child, parent, index);
         }
     }
@@ -232,7 +232,7 @@ class MarkdownSerializerState implements IMarkdownSerializerState {
         const active: ProseMark[] = [];
         const trailing = ref('');
 
-        for (const { node: child, offset, index } of ProseUtils.iterateChild(parent)) {
+        for (const { node: child, offset, index } of ProseTools.Node.iterateChild(parent)) {
             this.__serializeInline(child, offset, index, parent, active, trailing);
         }
         this.__serializeInline(null, 0, parent.childCount, parent, active, trailing);
@@ -252,7 +252,7 @@ class MarkdownSerializerState implements IMarkdownSerializerState {
         this._inTightList = isTight;
 
         // serialize child
-        for (const { node: child, index } of ProseUtils.iterateChild(node)) {
+        for (const { node: child, index } of ProseTools.Node.iterateChild(node)) {
             if (index > 0 && isTight) {
                 this.__flushCloseBlock(1);
             }

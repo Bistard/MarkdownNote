@@ -1,4 +1,5 @@
 import { Node as ProseNode, ResolvedPos } from "prosemirror-model";
+import { Selection } from "prosemirror-state";
 
 export {
     Step as ProseStep,
@@ -18,6 +19,8 @@ export {
     TextSelection as ProseTextSelection,
     SelectionRange as ProseSelectionRange,
 } from "prosemirror-state";
+
+export type ProseCursor = Selection & { empty: true; };
 
 export { 
     EditorView as ProseEditorView, 
@@ -56,8 +59,119 @@ declare module 'prosemirror-model' {
     interface ResolvedPos {
         
         /**
-         * @description The exact same API as {@link getParentNodeAt}. Except making
-         * depth = this.depth.
+         * @description Returns the absolute position of the **start** of the 
+         * node at the specified depth.
+         * 
+         * @param depth The depth at which to calculate the start position.
+         *   1. Defaults to `this.depth`, meaning it returns the start of the 
+         *      current node.
+         *   2. If `depth` is 0, returns 0, the start of the document.
+         * 
+         * @note The value is **inside** the node, meaning it points to the 
+         *       first character or first child node inside that node.
+         * 
+         * @example
+         * ```ts
+         * // Document structure:
+         * // <doc>
+         * //   <p>Hello, </p>
+         * //   <p>world!</p>
+         * // </doc>
+         * 
+         * const pos = doc.resolve(10);  // Inside the second p
+         * console.log(pos.start(1)); // Returns the position before "world!" but after <p>
+         * ```
+         */
+        start(depth?: number | null): number;
+
+        /**
+         * @description Returns the absolute position of the **end** of the node 
+         * at the specified depth.
+         * 
+         * @param depth The depth at which to calculate the end position.
+         *   1. Defaults to `this.depth`, meaning it returns the end of the 
+         *      current node.
+         *   2. If `depth` is 0, returns the length of the document, the end of 
+         *      the root.
+         * 
+         * @note The value is **inside** the node, meaning it points **after** 
+         *       the last character or last child node but before the node 
+         *       itself closes.
+         * 
+         * @example
+         * ```ts
+         * // Document structure:
+         * // <doc>
+         * //   <p>Hello, </p>
+         * //   <p>world!</p>
+         * // </doc>
+         * 
+         * const pos = doc.resolve(10);  // Inside the second p
+         * console.log(pos.end(1)); // Returns the position after "world!" but before </p>
+         * ```
+         */
+        end(depth?: number | null): number;
+
+        /**
+         * @description Returns the absolute position immediately **before** the 
+         * node at the specified depth.
+         * 
+         * @param depth The depth at which to calculate the before position.
+         *   1. Defaults to `this.depth`, meaning it returns the position before 
+         *      the current node.
+         *   2. If `depth` is 0, returns 0, as the document itself has no 
+         *      "before" position.
+         * 
+         * @note
+         * - `.start(depth)` returns the position **inside** the node at the given depth.
+         * - `.before(depth)` returns the position **before** the node in its parent.
+         * 
+         * @example
+         * ```ts
+         * // Document structure:
+         * // <doc>
+         * //   <paragraph>Hello, </paragraph>
+         * //   <paragraph>world!</paragraph>
+         * // </doc>
+         * 
+         * const pos = doc.resolve(10);  // Inside the second paragraph
+         * console.log(pos.start(1)); // Returns 9 (start of the second paragraph)
+         * console.log(pos.before(1)); // Returns 8 (before the second paragraph starts)
+         * ```
+         */
+        after(depth?: number | null): number;
+
+        /**
+         * @description Returns the absolute position immediately **after** the 
+         * node at the specified depth.
+         * 
+         * @param depth The depth at which to calculate the after position.
+         *   1. Defaults to `this.depth`, meaning it returns the position after 
+         *      the current node.
+         *   2. If `depth` is 0, returns the length of the document.
+         * 
+         * @note
+         * - `.end(depth)` returns the position **inside** the node, at its last position.
+         * - `.after(depth)` returns the position **after** the node in its parent's content.
+         * 
+         * @example
+         * ```ts
+         * // Document structure:
+         * // <doc>
+         * //   <paragraph>Hello, </paragraph>
+         * //   <paragraph>world!</paragraph>
+         * // </doc>
+         * 
+         * const pos = doc.resolve(10);  // Inside the second paragraph
+         * console.log(pos.end(1)); // Returns 15 (inside the paragraph, just before it closes)
+         * console.log(pos.after(1)); // Returns 16 (after the paragraph has closed)
+         * ```
+         */
+        before(depth?: number | null): number;
+
+        /**
+         * @description The exact same API as {@link getParentNodeAt}. Except 
+         * making `depth = this.depth`.
          * @note Wrapper of `this.node()`.
          */
         getCurrNode(): ProseNode;

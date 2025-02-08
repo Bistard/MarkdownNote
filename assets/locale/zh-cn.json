@@ -18,6 +18,9 @@
             "empty": "空数学公式",
             "rendering": "渲染中...",
             "error": "错误公式"
+        },
+        "editor/contrib/blockPlaceHolderExtension/blockPlaceHolderExtension": {
+            "emptyBlockPlaceHolder": "开始输入，或者试试 '@' 触发 AI，'/' 呼出命令..."
         }
     }
 }

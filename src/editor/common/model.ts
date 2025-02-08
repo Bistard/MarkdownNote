@@ -74,6 +74,8 @@ export interface IEditorModel extends IDisposable {
      */
     readonly state?: ProseEditorState;
 
+    // region - events
+
     /** 
      * Fires when the model is built for the first time.
      */
@@ -107,11 +109,25 @@ export interface IEditorModel extends IDisposable {
      */
     readonly onDidStateChange: Register<void>;
 
+    // region - general
+
     /**
      * @description Start building the model.
      * @note This will trigger `onDidBuild` event.
      */
     build(extensions: IEditorExtension[]): AsyncResult<ProseEditorState, Error>;
+
+    /**
+     * @description Mark if the model has any unsaved changes.
+     */
+    setDirty(value: boolean): void;
+
+    /**
+     * @description Save the text model into the disk.
+     */
+    save(): AsyncResult<void, Error>;
+
+    // region - text-related APIs
 
     /**
      * @description Inserts the given text at the given offset.
@@ -200,12 +216,11 @@ export interface IEditorModel extends IDisposable {
      */
     getCharCodeByLine(lineNumber: number, lineOffset: number): number;
 
-    /**
-     * @description Save the text model into the disk.
-     */
-    save(): AsyncResult<void, Error>;
+    // region - others
 
-    // internal
+    getRegisteredDocumentNodes(): string[];
+
+    // region - internal
 
     __onDidStateChange(event: IOnDidContentChangeEvent): void;
 }

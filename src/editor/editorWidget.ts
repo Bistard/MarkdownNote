@@ -58,11 +58,19 @@ export interface IEditorWidget extends
 
     /**
      * Returns the model.
+     * @panic If the editor is not intialized.
      */
     readonly model: IEditorModel;
 
     /**
+     * Returns the view model.
+     * @panic If the editor is not intialized.
+     */
+    readonly viewModel: IEditorViewModel;
+
+    /**
      * Returns the view.
+     * @panic If the editor is not intialized.
      */
     readonly view: IEditorView;
 
@@ -106,7 +114,7 @@ export interface IEditorWidget extends
  */
 export class EditorWidget extends Disposable implements IEditorWidget {
 
-    // #region [fields]
+    // region - [fields]
 
     /**
      * The HTML container of the entire editor.
@@ -134,7 +142,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
      */
     private readonly _options: EditorOptionController;
 
-    // #region [model events]
+    // region - [model events]
 
     private readonly _onDidStateChange = this.__register(new RelayEmitter<void>());
     public readonly onDidStateChange = this._onDidStateChange.registerListener;
@@ -148,7 +156,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
     private readonly _onDidSaveError = this.__register(new RelayEmitter<unknown>());
     public readonly onDidSaveError = this._onDidSaveError.registerListener;
 
-    // #region [view events]
+    // region - [view events]
 
     private readonly _onDidBlur = this.__register(new RelayEmitter<void>());
     public readonly onDidBlur = this._onDidBlur.registerListener;
@@ -252,7 +260,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
     private readonly _onWheel = this.__register(new RelayEmitter<WheelEvent>());
     public readonly onWheel = this._onWheel.registerListener;
 
-    // #region [constructor]
+    // region - [constructor]
 
     constructor(
         container: HTMLElement,
@@ -280,17 +288,18 @@ export class EditorWidget extends Disposable implements IEditorWidget {
         this.__register(this._extensions);
     }
 
-    // #region [getter]
+    // region - [getter]
 
     get initialized(): boolean { return !!this._model; }
 
     get model(): IEditorModel { return assert(this._model); }
+    get viewModel(): IEditorViewModel { return assert(this._viewModel); }
     get view(): IEditorView { return assert(this._view); }
 
     get readonly(): boolean { return !this._options.getOptions().writable.value; }
     get renderMode(): EditorType | null { return null; } // TODO
 
-    // #region [public methods]
+    // region - [public methods]
 
     public async open(source: URI): Promise<Result<void, Error>> {
         const currSource = this._model?.source;
@@ -328,7 +337,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
         );
 
         // listeners
-        this.__registerMVVMListeners(this._model, this._view);
+        this.__registerMVVMListeners(this._model, this._viewModel, this._view);
 
         // cache data
         this._editorData = this.__register(new EditorData(this._model, this._viewModel, this._view, undefined));
@@ -369,7 +378,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
         return this._contextHub.updateContext(name, value);
     }
 
-    // #region [editor-model methods]
+    // region - [editor-model methods]
 
     get source(): URI { return this.__assertModel().source; }
     get dirty(): boolean { return assert(this._model).dirty; }
@@ -382,7 +391,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
         return this.__assertModel().deleteAt(textOffset, length);
     }
 
-    // #region [private helper methods]
+    // region - [private helper methods]
 
     private __detachData(): void {
         this.release(this._editorData);
@@ -393,6 +402,10 @@ export class EditorWidget extends Disposable implements IEditorWidget {
 
     private __assertModel(): EditorModel {
         return assert(this._model, '[EditorWidget] EditorModel is not initialized.');
+    }
+    
+    private __assertViewModel(): EditorViewModel {
+        return assert(this._viewModel, '[EditorWidget] EditorViewModel is not initialized.');
     }
     
     private __assertView(): EditorView {
@@ -410,7 +423,7 @@ export class EditorWidget extends Disposable implements IEditorWidget {
         }));
     }
 
-    private __registerMVVMListeners(model: IEditorModel, view: IEditorView): void {
+    private __registerMVVMListeners(model: IEditorModel, viewModel: IEditorViewModel, view: IEditorView): void {
 
         // binding to the model
         this._onDidStateChange.setInput(model.onDidStateChange);

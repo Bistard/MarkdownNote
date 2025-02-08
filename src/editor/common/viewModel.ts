@@ -8,6 +8,8 @@ export interface IEditorViewModel extends Disposable {
     readonly onDidChangeModelState: Register<ProseTransaction>;
     readonly onDidBuild: Register<ProseEditorState>;
 
-
-    onDidChangeViewState(e: IOnDidContentChangeEvent): void;
+    /**
+     * @description This will be invoked whenever the view content changes.
+     */
+    onDidViewContentChange(e: IOnDidContentChangeEvent): void;
 }

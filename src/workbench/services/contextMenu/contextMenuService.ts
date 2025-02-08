@@ -1,5 +1,5 @@
 import { ContextMenuView, IAnchor, IContextMenu, IContextMenuDelegate, IContextMenuDelegateBase } from "src/base/browser/basic/contextMenu/contextMenu";
-import { addDisposableListener, DomEmitter, DomEventHandler, DomUtility, EventType } from "src/base/browser/basic/dom";
+import { DomEmitter, DomUtility, EventType } from "src/base/browser/basic/dom";
 import { IMenu, IMenuActionRunEvent, Menu, MenuWithSubmenu } from "src/base/browser/basic/menu/menu";
 import { CheckMenuAction, IMenuAction, MenuItemType, MenuSeparatorAction, SimpleMenuAction, SubmenuAction } from "src/base/browser/basic/menu/menuItem";
 import { Disposable, DisposableBucket, IDisposable } from "src/base/common/dispose";
@@ -13,6 +13,8 @@ import { ICommandService } from "src/platform/command/common/commandService";
 import { IRegistrantService } from "src/platform/registrant/common/registrantService";
 import { IContextService } from "src/platform/context/common/contextService";
 import { INotificationService } from "src/workbench/services/notification/notification";
+
+// region - [interface]
 
 export const IContextMenuService = createService<IContextMenuService>('context-menu-service');
 
@@ -39,6 +41,12 @@ interface IShowContextMenuDelegateBase extends IContextMenuDelegateBase {
      * named 'context-menu'.
      */
     getExtraContextMenuClassName?(): string;
+
+    /**
+     * @description If provided, fires when the context menu is about to be 
+     * closed, the client may return a `true` to prevent the destroy.
+     */
+    onDestroy?(cause: 'blur' | 'esc'): boolean;
 }
 
 export interface IShowContextMenuDelegate extends IShowContextMenuDelegateBase {
@@ -87,6 +95,8 @@ export interface IContextMenuService extends IService {
      */
     destroyContextMenu(): void;
 }
+
+// region - [service]
 
 /**
  * @class A context menu service provides functionality to pop up a context menu
@@ -246,6 +256,8 @@ export class ContextMenuService extends Disposable implements IContextMenuServic
     }
 }
 
+// region - [private]
+
 class __ContextMenuDelegate implements IContextMenuDelegate {
 
     // [fields]
@@ -278,7 +290,7 @@ class __ContextMenuDelegate implements IContextMenuDelegate {
     }
 
     public render(container: HTMLElement): IDisposable {
-        const menuDisposables = new DisposableBucket();
+        const lifecycle = new DisposableBucket();
         const delegate = this._delegate;
         const contextMenu = this._contextMenu;
 
@@ -288,7 +300,7 @@ class __ContextMenuDelegate implements IContextMenuDelegate {
         }
 
         // menu construction
-        this._menu = menuDisposables.register(
+        this._menu = lifecycle.register(
             new MenuWithSubmenu(
                 new Menu(container, {
                     contextProvider: () => delegate.getContext(),
@@ -305,48 +317,35 @@ class __ContextMenuDelegate implements IContextMenuDelegate {
          * automatically.
          */
         if (DEBUG_MODE) {
-            return menuDisposables;
+            return lifecycle;
         }
 
         // context menu destroy event
         [
             menu.onDidBlur,
             menu.onDidClose,
-            menuDisposables.register(new DomEmitter(window, EventType.blur)).registerListener,
+            lifecycle.register(new DomEmitter(window, EventType.blur)).registerListener,
         ]
-        .forEach(onEvent => {
-            menuDisposables.register(
-                onEvent.call(menu, () => contextMenu.destroy())
+        .forEach(event => {
+            
+            lifecycle.register(
+                event((e: void | FocusEvent) => {
+                    console.log(e);
+                    const isBlur = e ? 'blur' : 'esc';
+                    const prevent = delegate.onDestroy?.(isBlur);
+                    if (prevent) {
+                        return;
+                    }
+                    contextMenu.destroy();
+                })
             );
         });
 
-        // mousedown destroy event
-        menuDisposables.register(addDisposableListener(window, EventType.mousedown, (e) => {
-            if (e.defaultPrevented) {
-                return;
-            }
-
-            /**
-             * We are likely creating a context menu, let the context
-             * menu service to destroy it.
-             */
-            if (DomEventHandler.isRightClick(e)) {
-                return;
-            }
-
-            // clicking the child element will not destroy the view.
-            if (DomUtility.Elements.isAncestor(container, <HTMLElement | undefined>e.target)) {
-                return;
-            }
-
-            contextMenu.destroy();
-        }));
-
         // running action events
-        menuDisposables.register(menu.onBeforeRun(this._onBeforeActionRun, undefined, this));
-        menuDisposables.register(menu.onDidRun(this._onDidActionRun, undefined, this));
+        lifecycle.register(menu.onBeforeRun(this._onBeforeActionRun, undefined, this));
+        lifecycle.register(menu.onDidRun(this._onDidActionRun, undefined, this));
 
-        return menuDisposables;
+        return lifecycle;
     }
 
     public onFocus(): void {
@@ -354,8 +353,12 @@ class __ContextMenuDelegate implements IContextMenuDelegate {
         this._menu?.focus(-1);
     }
 
-    public onBeforeDestroy(): void {
-        // TEST
-        console.log('delegate: on before destroy');
+    public onBeforeDestroy(container: HTMLElement): void {
+        
+        // make sure the extra class is removed for later container to be reused.
+        const className = this._delegate.getExtraContextMenuClassName?.();
+        if (className) {
+            container.classList.remove(className);
+        }
     }
 }

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { log } = require('../utility');
+const { log, SmartRegExp } = require('../utility');
 
 /**
  * {@link localizationGenerator}
@@ -345,7 +345,11 @@ class localizationGenerator {
     }
 
     #parseFile(filePath) {
-        const LOCALIZE_REGEX = /localize\s*\(\s*["'`](.*?)["'`]\s*,\s*["'`](.*?)["'`]/g;
+        const LOCALIZE_REGEX = 
+            new SmartRegExp(/localize\(quote(str)quote,\s*quote(str)quote[\),]/g)
+            .replace('str', /.*?/)
+            .replace('quote', /["'`]/)
+            .get();
         let fileContent = fs.readFileSync(filePath, 'utf-8');
         fileContent = removeComments(fileContent);
 

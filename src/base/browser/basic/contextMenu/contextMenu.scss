@@ -1,8 +1,10 @@
-@use 'src/styles/settings/constants' as const;
     
 .context-menu {
-    z-index: const.$z-index-medium;
+    z-index: var(--z-index-medium);
     box-shadow: 5px 0px 10px 0px #e2e2e2;
+
+    border: 1px solid var(--nota-menu-border);
+    border-radius: 4px;
     
     // https://github.com/electron/electron/issues/741#issuecomment-60480286
     -webkit-app-region: no-drag;
